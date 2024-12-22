@@ -39,11 +39,11 @@ MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { return OPC; }
 dword               {return DWORD;}
 
 {NUMBER}            {yylval = atol(yytext); return DEC_VAL;}
-0[xX][0-9a-fA-F]+   {yylval = yytext; return HEX_VAL;}
-0[bB][0-1]+         {yylval = yytext; return BIN_VAL;}
+0[xX][0-9a-fA-F]+   {yylval = atol(yytext); return HEX_VAL;}
+0[bB][0-1]+         {yylval = atol(yytext); return BIN_VAL;}
 
-{APLHNUM}{SPACE}:$  { yylval = yytext; return LABEL_DECLARE;}
-{APLHNUM}$          { yylval = yytext; return LABEL;}
+{APLHNUM}{SPACE}:$  { return LABEL_DECLARE;}
+{APLHNUM}$          { return LABEL;}
 
 \n                  {return NEWLINE;}
 [ \t]               { /* ignore white spaces */ }
