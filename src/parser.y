@@ -21,15 +21,19 @@
 
 
 
-%%union{
-    int i,
-    long l,
+%union{
+    int i;
+    long l;
     char* s;
-    char c;
-}%%
+}
+
 
 %%
-    lines :  line lines
+    lines :  line lines {printf("Done ! \n");}
+        | NEWLINE lines
+        | /* empty */
+        ;
+    line : GLOBAL
         ;
 %%
 

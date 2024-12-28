@@ -2,6 +2,7 @@
     #include<stdio.h>
     #include <string.h>
     #include"parser.tab.h"
+    #include"../headers/utils.h"
 %}
 
 %option caseless
@@ -18,17 +19,17 @@ COMMENT ;.*
 
 {COMMENT}            { /* Ignore */ }
 
-{SECTION}{SPACE}".data"  { return SEC_DATA;}
+{SECTION}{SPACE}".data"  {return SEC_DATA;}
 {SECTION}{SPACE}".bss"   {return SEC_BSS;}
 {SECTION}{SPACE}".text" {return SEC_TEXT;}
 
 
-d[bwdq]              { return DEFINE_DATA; }
-res[bwdq]            { return DECLARE_BSS;}
+d[bwdq]              { yylval.i = get_size_in_bytes(yytext[1]); return DEFINE_DATA_TYPE;}
+res[bwdq]            { yylval.i = get_size_in_bytes(yytext[1]); return DECLARE_BSS_TYPE;}
 
-REGS                 { return REG;}
+REGS                 { yylval.s = strndup(yytext,strlen(yytext)); return REG;}
 
-MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { return OPC; }
+MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { yylval.s= strndup(yytext,strlen(yytext)); return OPC; }
 
 {global}            { return GLOBAL;}
 
@@ -38,12 +39,12 @@ MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { return OPC; }
 
 dword               {return DWORD;}
 
-{NUMBER}            {yylval = atol(yytext); return DEC_VAL;}
-0[xX][0-9a-fA-F]+   {yylval = atol(yytext); return HEX_VAL;}
-0[bB][0-1]+         {yylval = atol(yytext); return BIN_VAL;}
+{NUMBER}            {yylval.i = atol(yytext); return DEC_VAL;}
+0[xX][0-9a-fA-F]+   {yylval.i = atol(yytext); return HEX_VAL;}
+0[bB][0-1]+         {yylval.i = atol(yytext); return BIN_VAL;}
 
-{APLHNUM}{SPACE}:$  { return LABEL_DECLARE;}
-{APLHNUM}$          { return LABEL;}
+{APLHNUM}{SPACE}:$  { yylval.s = strndup(yytext,strlen(yytext)-1); return LABEL_DECLARE;}
+{APLHNUM}$          { yylval.s= strndup(yytext,strlen(yytext)); return LABEL;}
 
 \n                  {return NEWLINE;}
 [ \t]               { /* ignore white spaces */ }
