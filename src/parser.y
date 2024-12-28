@@ -14,15 +14,23 @@
 %token GLOBAL
 %token DWORD
 %token OPENING_BRACKET CLOSING_BRACKET
-%token DEFINE_DATA DECLARE_BSS
-%token HEX_VAL DEC_VAL BIN_VAL
-%token LABEL_DECLARE LABEL REG OPC MEM
-%token IMMD
+%token <i> DEFINE_DATA_TYPE DECLARE_BSS_TYPE
+%token <l> HEX_VAL DEC_VAL BIN_VAL
+%token <s> LABEL_DECLARE LABEL REG OPC MEM
+%token <l> IMMD
 
+
+
+%%union{
+    int i,
+    long l,
+    char* s;
+    char c;
+}%%
 
 %%
-    lines : 
-          ;
+    lines :  line lines
+        ;
 %%
 
 
