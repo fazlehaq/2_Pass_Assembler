@@ -1,4 +1,6 @@
 #include<stdio.h>
+#include"../headers/utils.h"
+
 
 int get_size_in_bytes(char bytes){
     switch (bytes)
