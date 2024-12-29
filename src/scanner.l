@@ -19,13 +19,14 @@ COMMENT ;.*
 
 {COMMENT}            { /* Ignore */ }
 
+
 {SECTION}{SPACE}".data"  {return SEC_DATA;}
 {SECTION}{SPACE}".bss"   {return SEC_BSS;}
 {SECTION}{SPACE}".text" {return SEC_TEXT;}
 
 
 d[bwdq]              { yylval.i = get_size_in_bytes(yytext[1]); return DEFINE_DATA_TYPE;}
-res[bwdq]            { yylval.i = get_size_in_bytes(yytext[1]); return DECLARE_BSS_TYPE;}
+res[bwdq]            { yylval.i = get_size_in_bytes(yytext[strlen(yytext)-1]); return DECLARE_BSS_TYPE;}
 
 REGS                 { yylval.s = strndup(yytext,strlen(yytext)); return REG;}
 
@@ -39,12 +40,12 @@ MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { yylval.s= strndup(y
 
 dword               {return DWORD;}
 
-{NUMBER}            {yylval.i = atol(yytext); return DEC_VAL;}
-0[xX][0-9a-fA-F]+   {yylval.i = atol(yytext); return HEX_VAL;}
-0[bB][0-1]+         {yylval.i = atol(yytext); return BIN_VAL;}
+{NUMBER}            {yylval.l = atol(yytext); return DEC_VAL;}
+0[xX][0-9a-fA-F]+   {yylval.l = atol(yytext); return HEX_VAL;}
+0[bB][0-1]+         {yylval.l = atol(yytext); return BIN_VAL;}
 
-{APLHNUM}{SPACE}:$  { yylval.s = strndup(yytext,strlen(yytext)-1); return LABEL_DECLARE;}
-{APLHNUM}$          { yylval.s= strndup(yytext,strlen(yytext)); return LABEL;}
+{APLHNUM}{SPACE}:  { yylval.s = strndup(yytext,strlen(yytext)-1); return LABEL_DECLARE;}
+{APLHNUM}          { yylval.s= strndup(yytext,strlen(yytext)); return LABEL;}
 
 \n                  {return NEWLINE;}
 [ \t]               { /* ignore white spaces */ }
