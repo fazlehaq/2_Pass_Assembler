@@ -19,14 +19,16 @@
 %token OPENING_BRACKET CLOSING_BRACKET
 %token <i> DEFINE_DATA_TYPE DECLARE_BSS_TYPE
 %token <l> HEX_VAL DEC_VAL BIN_VAL 
-%token <s> LABEL_DECLARE LABEL REG OPC MEM
+%token <s> LABEL_DECLARE 
+%token <s> LABEL REG OPC MEM
 
 %type <l> value
+%type <s> fnc
 
 %union{
     int i;
     long l;
-    char* s;
+    char *s;
 }
 
 
@@ -41,6 +43,7 @@ section_list:section section_list
 
 section: data_section
        | bss_section
+       | text_section
        ;
 
 data_section: SEC_DATA { printf("Parsing .data section\n"); } NEWLINE  data_lines 
@@ -64,6 +67,21 @@ bss_lines: bss_line NEWLINE bss_lines
 
 bss_line: LABEL DECLARE_BSS_TYPE value { printf("BSS: %s %d %ld\n", $1, $2 , $3); }
         ;
+
+text_section: SEC_TEXT { printf("Parsing the text section\n"); } NEWLINE text_lines
+        ;
+
+text_lines : text_line NEWLINE text_lines
+    | text_line
+    | 
+    ;
+
+text_line : GLOBAL LABEL {printf("GLOBAL %s \n",$2);}
+    | LABEL_DECLARE {printf("%s ",$1);} inst
+    | inst;
+
+inst : OPC {printf("%s\n",$1);}
+    ;
 
 value: DEC_VAL { $$ = $1;}
      | HEX_VAL { $$ = $1;}
