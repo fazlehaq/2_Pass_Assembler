@@ -8,7 +8,7 @@
 %option caseless
 
 SECTION "section"
-global global$
+global global
 REGS (eax|ebx|ecx|edx|esp|ebp|esi|edi)
 APLHNUM [a-zA-Z_]+[a-zA-Z0-9_]*
 SPACE [ \t]+
