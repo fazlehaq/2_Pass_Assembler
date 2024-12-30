@@ -45,7 +45,7 @@ dword               {return DWORD;}
 0[xX][0-9a-fA-F]+   {yylval.i = parsenum(yytext); return HEX_VAL;}
 0[bB][0-1]+         {yylval.i = parsenum(yytext); return BIN_VAL;}
 
-{APLHNUM}{SPACE}:  { yylval.s = strndup(yytext,strlen(yytext)-1); return LABEL_DECLARE;}
+{APLHNUM}{SPACE}*:  { yylval.s = strndup(yytext,strlen(yytext)-1); return LABEL_DECLARE;}
 {APLHNUM}          { yylval.s= strndup(yytext,strlen(yytext)); return LABEL;}
 
 \n                  {return NEWLINE;}
