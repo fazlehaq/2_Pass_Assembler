@@ -40,9 +40,9 @@ MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { yylval.s= strndup(y
 
 dword               {return DWORD;}
 
-{NUMBER}            {yylval.l = atol(yytext); return DEC_VAL;}
-0[xX][0-9a-fA-F]+   {yylval.l = atol(yytext); return HEX_VAL;}
-0[bB][0-1]+         {yylval.l = atol(yytext); return BIN_VAL;}
+{NUMBER}            {yylval.i = atoi(yytext); return DEC_VAL;}
+0[xX][0-9a-fA-F]+   {yylval.i = binary_str_to_int(yytext); return HEX_VAL;}
+0[bB][0-1]+         {yylval.i = hex_str_to_int(yytext); return BIN_VAL;}
 
 {APLHNUM}{SPACE}:  { yylval.s = strndup(yytext,strlen(yytext)-1); return LABEL_DECLARE;}
 {APLHNUM}          { yylval.s= strndup(yytext,strlen(yytext)); return LABEL;}
