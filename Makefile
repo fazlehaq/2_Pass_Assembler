@@ -14,8 +14,8 @@ parser.y: src/parser.y src/scanner.l
 	@bison -d src/parser.y -o src/parser.tab.c
 	@flex -o src/lex.yy.c src/scanner.l
 
-assembler.o: parser.y obj/utils.o 
-	@gcc $(CFLAGS)  obj/utils.o src/parser.tab.c src/lex.yy.c -o obj/assembler.o -lfl $(LDFLAGS)
+assembler.o: parser.y obj/utils.o  obj/symbol-table.o
+	@gcc $(CFLAGS)  src/parser.tab.c src/lex.yy.c obj/symbol-table.o obj/utils.o -o obj/assembler.o -lfl $(LDFLAGS)
 
 main: assembler.o
 
