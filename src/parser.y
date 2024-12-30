@@ -47,7 +47,7 @@ section: data_section
        | text_section
        ;
 
-data_section: SEC_DATA { printf("Parsing .data section\n"); } NEWLINE  data_lines 
+data_section: SEC_DATA { loc = 0; printf("Parsing .data section\n"); } NEWLINE  data_lines 
             ;
 
 data_lines: data_line NEWLINE data_lines 
@@ -61,7 +61,7 @@ data_line: LABEL DEFINE_DATA_TYPE value {
                                         }
          ;
 
-bss_section: SEC_BSS { printf("Parsing .bss section\n"); } NEWLINE bss_lines
+bss_section: SEC_BSS { loc = 0; printf("Parsing .bss section\n"); } NEWLINE bss_lines
            ;
 
 bss_lines: bss_line NEWLINE bss_lines
@@ -72,7 +72,7 @@ bss_lines: bss_line NEWLINE bss_lines
 bss_line: LABEL DECLARE_BSS_TYPE value { printf("BSS: %s %d %d\n", $1, $2 , $3); }
         ;
 
-text_section: SEC_TEXT { printf("Parsing the text section\n"); } NEWLINE text_lines
+text_section: SEC_TEXT { loc = 0; printf("Parsing the text section\n"); } NEWLINE text_lines
         ;
 
 text_lines : text_line NEWLINE text_lines
@@ -80,8 +80,8 @@ text_lines : text_line NEWLINE text_lines
     | 
     ;
 
-text_line : GLOBAL LABEL {printf("GLOBAL %s \n",$2);}
-    | LABEL_DECLARE {printf("%s ",$1);} inst
+text_line : GLOBAL LABEL
+    | LABEL_DECLARE {printf("%s\n",$1); handle_label_declare(symbol_table,$1,loc,DEFINED_SYMBOL);} inst 
     | inst;
 
 inst : OPC {printf("%s\n",$1);}
@@ -91,7 +91,7 @@ value: DEC_VAL { $$ = $1;}
      | HEX_VAL { $$ = $1;}
      | BIN_VAL { $$ = $1;}
      ;
-
+ 
 %%
 
 
