@@ -21,9 +21,9 @@ typedef struct Symbol {
 typedef GHashTable SymbolTable;
 
 SymbolTable* init_symbol_table();
-int is_symbol_exists(SymbolTable *symbolTable,char *symbol_name);
-Symbol *createSymbol(char *name, int address, int section, int size,int status,int value) ;
-int insertSymbol(SymbolTable *symbolTable, char *name, int address, int section, int size,int status,int value);
-Symbol *searchSymbol(SymbolTable *symbolTable, char *name);
-void displaySymbolTable(SymbolTable *symbolTable);
-void freeSymbolTable(SymbolTable *symbolTable);
+int is_symbol_exists(SymbolTable *symbol_table,char *symbol_name);
+Symbol *create_symbol(char *name, int address, int section, int size,int status,int value) ;
+int insert_symbol(SymbolTable *symbol_table, char *name, int address, int section, int size,int status,int value);
+Symbol *search_symbol(SymbolTable *symbol_table, char *name);
+void display_symbol_table(SymbolTable *symbol_table);
+void free_symbol_table(SymbolTable *symbol_table);

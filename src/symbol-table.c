@@ -43,13 +43,13 @@ SymbolTable* init_symbol_table(){
     return (SymbolTable *) g_hash_table_new(g_str_hash,g_str_equal);
 }
 
-int is_symbol_exists(SymbolTable *symbolTable,char *symbol_name){
-    if (g_hash_table_contains(symbolTable, symbol_name))    return 1;
+int is_symbol_exists(SymbolTable *symbol_table,char *symbol_name){
+    if (g_hash_table_contains(symbol_table, symbol_name))    return 1;
     return 0;
 }
 
 // Function to create a new symbol
-Symbol *createSymbol(char *name, int address, int section, int size,int status,int value) {
+Symbol *create_symbol(char *name, int address, int section, int size,int status,int value) {
     Symbol *symbol = (Symbol *)malloc(sizeof(Symbol));
     symbol->name = g_strdup(name);  
     symbol->address = address;
@@ -61,29 +61,29 @@ Symbol *createSymbol(char *name, int address, int section, int size,int status,i
 }
 
 // Insert a symbol into the table
-int insertSymbol(SymbolTable *symbolTable, char *name, int address, int section, int size,int status,int value) {
+int insert_symbol(SymbolTable *symbol_table, char *name, int address, int section, int size,int status,int value) {
     char *key = name;
-    if (g_hash_table_contains(symbolTable, key)) {
+    if (g_hash_table_contains(symbol_table, key)) {
         printf("Error: Symbol '%s' already exists in section %d'.\n", name, section);
         return 0;
     }
 
-    Symbol *symbol = createSymbol(name, address, section, size,status,value);
-    g_hash_table_insert(symbolTable, g_strdup(key), symbol);
+    Symbol *symbol = create_symbol(name, address, section, size,status,value);
+    g_hash_table_insert(symbol_table, g_strdup(key), symbol);
 
     return 1;
 }
 
 // Search for a symbol in the table
-Symbol *searchSymbol(SymbolTable *symbolTable, char *name) {
-    return (Symbol *)g_hash_table_lookup(symbolTable, name);
+Symbol *search_symbol(SymbolTable *symbol_table, char *name) {
+    return (Symbol *)g_hash_table_lookup(symbol_table, name);
 }
 
 // Display the symbol table
-void displaySymbolTable(SymbolTable *symbolTable) {
+void display_symbol_table(SymbolTable *symbol_table) {
     GHashTableIter iter;
     gpointer key, value;
-    g_hash_table_iter_init(&iter, symbolTable);
+    g_hash_table_iter_init(&iter, symbol_table);
 
     printf("Symbol Table:\n");
     printf("Name\tAddress\tSection\tType\tValue\tStatus\n");
@@ -96,10 +96,10 @@ void displaySymbolTable(SymbolTable *symbolTable) {
 }
 
 // Free allocated memory
-void freeSymbolTable(SymbolTable *symbolTable) {
+void free_symbol_table(SymbolTable *symbol_table) {
     GHashTableIter iter;
     gpointer key, value;
-    g_hash_table_iter_init(&iter, symbolTable);
+    g_hash_table_iter_init(&iter, symbol_table);
 
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         Symbol *symbol = (Symbol *)value;
@@ -107,5 +107,5 @@ void freeSymbolTable(SymbolTable *symbolTable) {
         free(symbol);  // Free the symbol structure itself
         g_free(key);  // Free the memory allocated for the hash key
     }
-    g_hash_table_destroy(symbolTable);
+    g_hash_table_destroy(symbol_table);
 }

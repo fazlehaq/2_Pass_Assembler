@@ -8,8 +8,9 @@
     void yyerror(const char *s);
 
     int pass; // storing the pass number 1 or 2
-    int loc;  // keeping track of the address / location cnt
+    int loc = 0;  // keeping track of the address / location cnt
     extern FILE *yyin;
+    SymbolTable *symbol_table;
 %}
 
 
@@ -19,7 +20,7 @@
 %token DWORD
 %token OPENING_BRACKET CLOSING_BRACKET
 %token <i> DEFINE_DATA_TYPE DECLARE_BSS_TYPE
-%token <l> HEX_VAL DEC_VAL BIN_VAL 
+%token <i> HEX_VAL DEC_VAL BIN_VAL 
 %token <s> LABEL_DECLARE 
 %token <s> LABEL REG OPC MEM
 
@@ -54,7 +55,7 @@ data_lines: data_line NEWLINE data_lines
           |
           ;
 
-data_line: LABEL DEFINE_DATA_TYPE value { printf("Data: %s %d %ld\n", $1, $2, $3); }
+data_line: LABEL DEFINE_DATA_TYPE value { Symbol *symbol = insert_symbol($1,loc,DATA_SECTION,$2,)}
          ;
 
 bss_section: SEC_BSS { printf("Parsing .bss section\n"); } NEWLINE bss_lines
@@ -101,6 +102,9 @@ int main(int argc,char *argv[]) {
         printf("Error : File not provided!\n");
         return 0;
     }
+
+    // Initializing the symbol table
+    symbol_table = init_symbol_table();
     yyin = fopen(argv[1],"r");
     if(!yyin){
         perror("Error Opening File\n");
