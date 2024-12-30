@@ -52,6 +52,7 @@ int check_number_size(long number, int size) {
 
 
 int binary_str_to_int(char *binary_str){
+    binary_str += 2;
     int result = 0;
     while (*binary_str) {
         result = (result << 1) + (*binary_str - '0'); // Left shift and add bit
