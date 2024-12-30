@@ -86,7 +86,7 @@ void display_symbol_table(SymbolTable *symbol_table) {
     g_hash_table_iter_init(&iter, symbol_table);
 
     printf("Symbol Table:\n");
-    printf("Name\tAddress\tSection\tType\tValue\tStatus\n");
+    printf("Name\tAddress\tSection\tSize(B)\tValue\tStatus\n");
     printf("---------------------------------------------------\n");
 
     while (g_hash_table_iter_next(&iter, &key, &value)) {
@@ -108,4 +108,23 @@ void free_symbol_table(SymbolTable *symbol_table) {
         g_free(key);  // Free the memory allocated for the hash key
     }
     g_hash_table_destroy(symbol_table);
+}
+
+
+int handle_label_declare(SymbolTable *symbol_table,char* symbol_name,int address, int status){
+    if (status == DEFINED_SYMBOL){
+        Symbol *symbol = search_symbol(symbol_table,symbol_name);
+        if(symbol){
+            symbol->address = address;
+            symbol->status = DEFINED_SYMBOL;
+            return 1;
+        }
+        else {
+            int insert_symbol(SymbolTable *symbol_table, char *name, int address, int section, int size,int status,int value);
+            if(insert_symbol(symbol_table,symbol_name,address,TEXT_SECTION,0,DEFINED_SYMBOL,0)) return 1;
+            else return 0;
+        }
+    }
+
+    return 1;
 }

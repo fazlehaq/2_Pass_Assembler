@@ -27,3 +27,4 @@ int insert_symbol(SymbolTable *symbol_table, char *name, int address, int sectio
 Symbol *search_symbol(SymbolTable *symbol_table, char *name);
 void display_symbol_table(SymbolTable *symbol_table);
 void free_symbol_table(SymbolTable *symbol_table);
+int handle_label_declare(SymbolTable *symbol_table,char* symbol_name,int address, int status);
