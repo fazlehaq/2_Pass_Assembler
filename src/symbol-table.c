@@ -39,7 +39,14 @@ char * get_status_name(int val){
     }
 }
 
+SymbolTable* init_symbol_table(){
+    return (SymbolTable *) g_hash_table_new(g_str_hash,g_str_equal);
+}
 
+int is_symbol_exists(SymbolTable *symbolTable,char *symbol_name){
+    if (g_hash_table_contains(symbolTable, symbol_name))    return 1;
+    return 0;
+}
 
 // Function to create a new symbol
 Symbol *createSymbol(char *name, int address, int section, int size,int status) {
@@ -53,7 +60,7 @@ Symbol *createSymbol(char *name, int address, int section, int size,int status) 
 }
 
 // Insert a symbol into the table
-int insertSymbol(GHashTable *symbolTable, char *name, int address, int section, int size,int status) {
+int insertSymbol(SymbolTable *symbolTable, char *name, int address, int section, int size,int status) {
     char *key = name;
     if (g_hash_table_contains(symbolTable, key)) {
         printf("Error: Symbol '%s' already exists in section %d'.\n", name, section);
@@ -67,12 +74,12 @@ int insertSymbol(GHashTable *symbolTable, char *name, int address, int section, 
 }
 
 // Search for a symbol in the table
-Symbol *searchSymbol(GHashTable *symbolTable, char *name) {
+Symbol *searchSymbol(SymbolTable *symbolTable, char *name) {
     return (Symbol *)g_hash_table_lookup(symbolTable, name);
 }
 
 // Display the symbol table
-void displaySymbolTable(GHashTable *symbolTable) {
+void displaySymbolTable(SymbolTable *symbolTable) {
     GHashTableIter iter;
     gpointer key, value;
     g_hash_table_iter_init(&iter, symbolTable);
@@ -88,7 +95,7 @@ void displaySymbolTable(GHashTable *symbolTable) {
 }
 
 // Free allocated memory
-void freeSymbolTable(GHashTable *symbolTable) {
+void freeSymbolTable(SymbolTable *symbolTable) {
     GHashTableIter iter;
     gpointer key, value;
     g_hash_table_iter_init(&iter, symbolTable);
@@ -101,30 +108,3 @@ void freeSymbolTable(GHashTable *symbolTable) {
     }
     g_hash_table_destroy(symbolTable);
 }
-
-// int main() {
-//     // Initialize the symbol table
-//     GHashTable *symbolTable = g_hash_table_new(g_str_hash, g_str_equal);
-
-//     // Insert symbols
-//     insertSymbol(symbolTable, "x", 100, DATA_SECTION, 1,DEFINED_SYMBOL);
-//     insertSymbol(symbolTable, "y", 200, DATA_SECTION, 2,UNDEFINED_SYMBOL);
-//     insertSymbol(symbolTable, "z", 300, BSS_SECTION, 2,DECLARED_SYMBOL);
-//     insertSymbol(symbolTable, "main", 600,TEXT_SECTION , 4,DEFINED_SYMBOL);
-//     insertSymbol(symbolTable, "x", 150, BSS_SECTION , 1,UNDEFINED_SYMBOL); // Duplicate example
-
-//     // Display the table
-//     displaySymbolTable(symbolTable);
-
-//     // Search for a symbol
-//     Symbol *result = searchSymbol(symbolTable, "y");
-//     if (result) {
-//         printf("Found %s at address %d in section %d with size %d\n", result->name, result->address, result->section, result->size);
-//     } else {
-//         printf("Symbol not found\n");
-//     }
-
-//     // Free memory
-//     freeSymbolTable(symbolTable);
-//     return 0;
-// }
