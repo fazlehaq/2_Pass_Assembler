@@ -49,25 +49,26 @@ int is_symbol_exists(SymbolTable *symbolTable,char *symbol_name){
 }
 
 // Function to create a new symbol
-Symbol *createSymbol(char *name, int address, int section, int size,int status) {
+Symbol *createSymbol(char *name, int address, int section, int size,int status,int value) {
     Symbol *symbol = (Symbol *)malloc(sizeof(Symbol));
     symbol->name = g_strdup(name);  
     symbol->address = address;
     symbol->section = section;
     symbol->size = size;
     symbol->status = status;
+    symbol->value = value;
     return symbol;
 }
 
 // Insert a symbol into the table
-int insertSymbol(SymbolTable *symbolTable, char *name, int address, int section, int size,int status) {
+int insertSymbol(SymbolTable *symbolTable, char *name, int address, int section, int size,int status,int value) {
     char *key = name;
     if (g_hash_table_contains(symbolTable, key)) {
         printf("Error: Symbol '%s' already exists in section %d'.\n", name, section);
         return 0;
     }
 
-    Symbol *symbol = createSymbol(name, address, section, size,status);
+    Symbol *symbol = createSymbol(name, address, section, size,status,value);
     g_hash_table_insert(symbolTable, g_strdup(key), symbol);
 
     return 1;
@@ -85,12 +86,12 @@ void displaySymbolTable(SymbolTable *symbolTable) {
     g_hash_table_iter_init(&iter, symbolTable);
 
     printf("Symbol Table:\n");
-    printf("Name\tAddress\tSection\tType\tStatus\n");
+    printf("Name\tAddress\tSection\tType\tValue\tStatus\n");
     printf("-----------------------------------\n");
 
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         Symbol *symbol = (Symbol *)value;
-        printf("%s\t%d\t%s\t%d\t%s\n", symbol->name, symbol->address, get_section_name(symbol->section), symbol->size,get_status_name(symbol->status));
+        printf("%s\t%X\t%s\t%d\t%X\t%s\n", symbol->name, symbol->address, get_section_name(symbol->section), symbol->size,symbol->value,get_status_name(symbol->status));
     }
 }
 
