@@ -87,7 +87,7 @@ void display_symbol_table(SymbolTable *symbol_table) {
 
     printf("Symbol Table:\n");
     printf("Name\tAddress\tSection\tType\tValue\tStatus\n");
-    printf("-----------------------------------\n");
+    printf("---------------------------------------------------\n");
 
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         Symbol *symbol = (Symbol *)value;

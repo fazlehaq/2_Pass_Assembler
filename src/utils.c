@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<string.h>
+#include<stdlib.h>
 #include"../headers/utils.h"
 
 
@@ -51,17 +52,12 @@ int check_number_size(long number, int size) {
 }
 
 
-int binary_str_to_int(char *binary_str){
-    binary_str += 2;
-    int result = 0;
-    while (*binary_str) {
-        result = (result << 1) + (*binary_str - '0'); // Left shift and add bit
-        binary_str++;
+int parsenum(char *num_str){
+    if (strncmp(num_str, "0x", 2) == 0 || strncmp(num_str,"0X",2) == 0) {
+        return strtol(num_str, NULL, 16); // Hexadecimal
+    } else if (strncmp(num_str, "0b", 2) == 0 || strncmp(num_str, "0B", 2) == 0) {
+        return strtol(num_str + 2, NULL, 2); // Binary
+    } else {
+        return atoi(num_str); // Decimal
     }
-    return result;
 }
-
-int hex_str_to_int(char *hex_str){
-    return strtol(hex_str, NULL, 16);
-}
-

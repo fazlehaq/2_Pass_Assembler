@@ -24,7 +24,7 @@
 %token <s> LABEL_DECLARE 
 %token <s> LABEL REG OPC MEM
 
-%type <l> value
+%type <i> value
 
 %union{
     int i;
@@ -55,7 +55,10 @@ data_lines: data_line NEWLINE data_lines
           |
           ;
 
-data_line: LABEL DEFINE_DATA_TYPE value { Symbol *symbol = insert_symbol($1,loc,DATA_SECTION,$2,)}
+data_line: LABEL DEFINE_DATA_TYPE value {  
+                                          insert_symbol(symbol_table,$1,loc,DATA_SECTION,$2,DEFINED_SYMBOL,$3); 
+                                          loc+=$2 ; 
+                                        }
          ;
 
 bss_section: SEC_BSS { printf("Parsing .bss section\n"); } NEWLINE bss_lines
@@ -66,7 +69,7 @@ bss_lines: bss_line NEWLINE bss_lines
          |
          ;
 
-bss_line: LABEL DECLARE_BSS_TYPE value { printf("BSS: %s %d %ld\n", $1, $2 , $3); }
+bss_line: LABEL DECLARE_BSS_TYPE value { printf("BSS: %s %d %d\n", $1, $2 , $3); }
         ;
 
 text_section: SEC_TEXT { printf("Parsing the text section\n"); } NEWLINE text_lines
@@ -112,4 +115,5 @@ int main(int argc,char *argv[]) {
     }
     pass = 1;
     yyparse();
+    display_symbol_table(symbol_table);
 }
