@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<string.h>
 #include"../headers/utils.h"
 
 
@@ -47,5 +48,19 @@ int check_number_size(long number, int size) {
         default:
             return 0; // Invalid size
     }
+}
+
+
+int binary_str_to_int(char *binary_str){
+    int result = 0;
+    while (*binary_str) {
+        result = (result << 1) + (*binary_str - '0'); // Left shift and add bit
+        binary_str++;
+    }
+    return result;
+}
+
+int hex_str_to_int(char *hex_str){
+    return strtol(hex_str, NULL, 16);
 }
 
