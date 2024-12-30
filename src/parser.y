@@ -2,6 +2,7 @@
     #include<stdio.h>
     #include<string.h>
     #include<stdlib.h>
+    #include"../headers/symbol-table.h"
 
     int yylex();
     void yyerror(const char *s);
@@ -23,7 +24,6 @@
 %token <s> LABEL REG OPC MEM
 
 %type <l> value
-%type <s> fnc
 
 %union{
     int i;
