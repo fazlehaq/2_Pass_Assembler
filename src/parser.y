@@ -16,6 +16,7 @@
 
 %token SEC_DATA SEC_BSS SEC_TEXT
 %token NEWLINE COMMA
+%token PLUS MINUS
 %token GLOBAL
 %token DWORD
 %token OPENING_BRACKET CLOSING_BRACKET
@@ -81,10 +82,54 @@ text_lines : text_line NEWLINE text_lines
     ;
 
 text_line : GLOBAL LABEL
-    | LABEL_DECLARE {printf("%s\n",$1); handle_label_declare(symbol_table,$1,loc,DEFINED_SYMBOL);} inst 
+    | LABEL_DECLARE {handle_label_declare(symbol_table,$1,loc,DEFINED_SYMBOL);} inst 
     | inst;
 
-inst : OPC {printf("%s\n",$1);}
+
+inst : 
+    // | OPC value {
+    //     printf("opcode immediate\n"); 
+    // } 
+    // | OPC PLUS value {printf("opcode positive immediate\n");}
+    // | OPC MINUS value {printf("opcode negative immediate\n");}
+
+    | OPC LABEL {printf("opcode label\n");}
+    | OPC REG {printf("opcode register\n");}
+
+    | OPC REG COMMA REG {printf("opcode reg reg\n");}
+    | OPC OPENING_BRACKET REG CLOSING_BRACKET COMMA REG {printf("regAddress , reg\n");}
+    // | OPC OPENING_BRACKET REG PLUS value CLOSING_BRACKET COMMA REG {printf("regAddress with displacement , reg\n");}
+    // | OPC OPENING_BRACKET REG MINUS value CLOSING_BRACKET COMMA REG {printf("regAddress with negative displacement , reg\n");}
+
+    | OPC REG COMMA value {printf("register immediate\n");}
+    | OPC REG COMMA PLUS value {printf("Register  positive_immediate\n");}
+    | OPC REG COMMA MINUS value {printf("Register negative_immediate\n");}
+
+    | OPC REG COMMA LABEL {printf("Register and variable\n");}
+    | OPC REG COMMA OPENING_BRACKET LABEL CLOSING_BRACKET {printf("Register , label adrress");}
+    // | OPC REG COMMA OPENING_BRACKET LABEL PLUS value CLOSING_BRACKET {printf("Register , label adrress");}
+    // | OPC REG COMMA OPENING_BRACKET LABEL MINUS value CLOSING_BRACKET {printf("Register , label adrress");}
+
+    | OPC REG COMMA OPENING_BRACKET value CLOSING_BRACKET {printf("Register immediate_Adrresing\n");}
+    | OPC REG COMMA OPENING_BRACKET REG CLOSING_BRACKET {printf("Register Register Addressing\n");}
+    // | OPC REG COMMA OPENING_BRACKET REG PLUS value CLOSING_BRACKET {printf("\n");}
+    // | OPC REG COMMA OPENING_BRACKET REG MINUS value CLOSING_BRACKET {printf("\n");}
+
+    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET 
+    // | OPC DWORD OPENING_BRACKET REG PLUS value CLOSING_BRACKET 
+    // | OPC DWORD OPENING_BRACKET REG MINUS value CLOSING_BRACKET 
+
+    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA value
+    // | OPC DWORD OPENING_BRACKET REG PLUS value CLOSING_BRACKET COMMA value
+    // | OPC DWORD OPENING_BRACKET REG MINUS value CLOSING_BRACKET COMMA value
+    
+    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA PLUS value
+    // | OPC DWORD OPENING_BRACKET REG PLUS value CLOSING_BRACKET COMMA PLUS value
+    // | OPC DWORD OPENING_BRACKET REG MINUS value CLOSING_BRACKET COMMA PLUS value
+
+    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA MINUS value
+    // | OPC DWORD OPENING_BRACKET REG PLUS value CLOSING_BRACKET COMMA MINUS value
+    // | OPC DWORD OPENING_BRACKET REG MINUS value CLOSING_BRACKET COMMA MINUS value
     ;
 
 value: DEC_VAL { $$ = $1;}

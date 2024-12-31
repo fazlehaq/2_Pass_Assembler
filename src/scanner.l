@@ -38,6 +38,9 @@ MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { yylval.s= strndup(y
 "["                 {return OPENING_BRACKET;}
 "]"                 {return CLOSING_BRACKET;}
 
+\+                  {return PLUS;}
+\-                  {return MINUS;}
+
 dword               {return DWORD;}
 
 {NUMBER}            {yylval.i = parsenum(yytext); return DEC_VAL;}
