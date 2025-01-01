@@ -61,3 +61,16 @@ int parsenum(char *num_str){
         return atoi(num_str); // Decimal
     }
 }
+
+
+int strip_extra_chars(char *str) {
+    int len = 0;
+    while (*str != '\0') { 
+        if (*str == ' ' || *str == ':') { 
+            break;
+        }
+        str++;
+        len++;
+    }
+    return len;
+}

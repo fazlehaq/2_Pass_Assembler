@@ -3,6 +3,7 @@
     #include <string.h>
     #include"parser.tab.h"
     #include"../headers/utils.h"
+    int yyline = 1;
 %}
 
 %option caseless
@@ -48,10 +49,10 @@ dword               {return DWORD;}
 0[xX][0-9a-fA-F]+   {yylval.i = parsenum(yytext); return HEX_VAL;}
 0[bB][0-1]+         {yylval.i = parsenum(yytext); return BIN_VAL;}
 
-{APLHNUM}{SPACE}*:  { yylval.s = strndup(yytext,strlen(yytext)-1); return LABEL_DECLARE;}
+{APLHNUM}[ \t]*:  { yylval.s = strndup(yytext,strip_extra_chars(yytext)); return LABEL_DECLARE;}
 {APLHNUM}          { yylval.s= strndup(yytext,strlen(yytext)); return LABEL;}
 
-\n                  {return NEWLINE;}
+\n                  {yyline++; return NEWLINE;}
 [ \t]               { /* ignore white spaces */ }
 
 %%

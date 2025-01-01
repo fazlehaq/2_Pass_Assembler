@@ -3,3 +3,4 @@ int check_number_size(long number, int size);
 int binary_str_to_int(char *binary_str);
 int hex_str_to_int(char *hex_str);
 int parsenum(char *num_str);
+int strip_extra_chars(char *str);
