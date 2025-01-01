@@ -27,29 +27,37 @@ int get_size_in_bytes(char bytes){
 }
 
 int check_number_size(long number, int size) {
+    long min, max;
+
     switch (size) {
-        case 1:
-            if ((number & ~0xFF) != 0) // Check if bits outside 1 byte are set
-                return 0;
-            return 1;
+        case 1: // 1 byte: range -128 to 127
+            min = -128;
+            max = 127;
+            break;
 
-        case 2:
-            if ((number & ~0xFFFF) != 0) // Check if bits outside 2 bytes are set
-                return 0;
-            return 1;
+        case 2: // 2 bytes: range -32,768 to 32,767
+            min = -32768;
+            max = 32767;
+            break;
 
-        case 3:
-            if ((number & ~0xFFFFFF) != 0) // Check if bits outside 3 bytes are set
-                return 0;
-            return 1;
+        case 3: // 3 bytes: range -8,388,608 to 8,388,607
+            min = -8388608;
+            max = 8388607;
+            break;
 
-        case 4:
-            return 1; // Any number fits in 4 bytes
-        
-        default:
-            return 0; // Invalid size
+        case 4: // 4 bytes: range -2,147,483,648 to 2,147,483,647
+            min = -2147483648L;
+            max = 2147483647L;
+            break;
+
+        default: // Invalid size
+            return 0;
     }
+
+    // Check if the number is within the valid range
+    return (number >= min && number <= max);
 }
+
 
 
 int parsenum(char *num_str){
