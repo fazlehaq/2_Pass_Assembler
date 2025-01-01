@@ -98,7 +98,11 @@ inst : OPC
         handle_label(pass,symbol_table,$2,-1,TEXT_SECTION,UNDEFINED_SYMBOL);
         loc += size;
         }
-    | OPC REG {printf("opcode register\n");}
+
+    | OPC REG {
+        printf("opcode register\n");
+        loc += handle_op_register(pass,$1,$2);
+    }
 
     | OPC REG COMMA REG {printf("opcode reg reg\n");}
     | OPC OPENING_BRACKET REG CLOSING_BRACKET COMMA REG {printf("regAddress , reg\n");}

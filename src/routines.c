@@ -62,12 +62,11 @@ void handle_label(int pass, SymbolTable *symbol_table, char *symbol_name, int ad
             printf("Error : Invalid use of symbol %s\n", symbol_name);
             exit(EXIT_FAILURE);
         }
-        return 1;
     }
 }
 
 // checks if inst is valid and returns the size of inst
-int handle_op_label(int pass,char* op_name, char* label_name)
+int handle_op_label(int pass, char *op_name, char *label_name)
 {
     if (
         strcmp(op_name, "jmp") == 0 ||
@@ -75,11 +74,47 @@ int handle_op_label(int pass,char* op_name, char* label_name)
         strcmp(op_name, "jnz") == 0 ||
         strcmp(op_name, "JMP") == 0 ||
         strcmp(op_name, "JZ") == 0 ||
-        strcmp(op_name, "JNZ") == 0 )
+        strcmp(op_name, "JNZ") == 0)
     {
         // assumption is that jmps will be relative 8 bits only
         return 2;
     }
     printf("Error : Invalid use of label : %s\n", label_name);
     exit(EXIT_FAILURE);
+}
+
+int handle_op_register(int pass, char *op_name, char *reg)
+{
+    // Div Mul-> 2 bytes
+    // INC DEC -> 1 bytes
+    if (pass == 1)
+    {
+        if (
+            strcmp(op_name, "DIV") == 0 ||
+            strcmp(op_name, "div") == 0 ||
+            strcmp(op_name, "MUL") == 0 ||
+            strcmp(op_name, "mul") == 0 
+        ){
+            return 2;
+        }
+        else if (
+            strcmp(op_name, "INC") == 0 ||
+            strcmp(op_name, "inc") == 0 ||
+            strcmp(op_name, "DEC") == 0 ||
+            strcmp(op_name, "dec") == 0
+        )
+        {
+            return 1;
+        }
+        else
+        {
+            printf("Error : Invalid Instruction : %s\n",op_name);
+            exit(EXIT_FAILURE);
+        }
+    }
+    else if (pass == 2)
+    {
+        printf("Not implemented yet!\n");
+        exit(EXIT_FAILURE);
+    }
 }
