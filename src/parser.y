@@ -104,7 +104,10 @@ inst : OPC
         loc += handle_op_register(pass,$1,$2);
     }
 
-    | OPC REG COMMA REG {printf("opcode reg reg\n");}
+    | OPC REG COMMA REG {
+        printf("opcode reg reg\n");
+        loc += handle_op_reg_reg(pass,$1,$2,$4);
+    }
     | OPC OPENING_BRACKET REG CLOSING_BRACKET COMMA REG {printf("regAddress , reg\n");}
 
     | OPC REG COMMA value {printf("register immediate\n");}

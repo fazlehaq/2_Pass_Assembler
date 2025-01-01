@@ -17,6 +17,10 @@ int handle_variable_symbol(int pass, SymbolTable *symbol_table, char *symbol_nam
         }
         return 1;
     }
+    else {
+        printf("Error : Pass 2 not implemented yet!\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void handle_label(int pass, SymbolTable *symbol_table, char *symbol_name, int address, int section, int status)
@@ -63,6 +67,11 @@ void handle_label(int pass, SymbolTable *symbol_table, char *symbol_name, int ad
             exit(EXIT_FAILURE);
         }
     }
+    else if (pass == 2)
+    {
+        printf("Not implemented yet!\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 // checks if inst is valid and returns the size of inst
@@ -93,28 +102,57 @@ int handle_op_register(int pass, char *op_name, char *reg)
             strcmp(op_name, "DIV") == 0 ||
             strcmp(op_name, "div") == 0 ||
             strcmp(op_name, "MUL") == 0 ||
-            strcmp(op_name, "mul") == 0 
-        ){
+            strcmp(op_name, "mul") == 0)
+        {
             return 2;
         }
         else if (
             strcmp(op_name, "INC") == 0 ||
             strcmp(op_name, "inc") == 0 ||
             strcmp(op_name, "DEC") == 0 ||
-            strcmp(op_name, "dec") == 0
-        )
+            strcmp(op_name, "dec") == 0)
         {
             return 1;
         }
         else
         {
-            printf("Error : Invalid Instruction : %s\n",op_name);
+            printf("Error : Invalid Instruction : %s\n", op_name);
             exit(EXIT_FAILURE);
         }
     }
     else if (pass == 2)
     {
         printf("Not implemented yet!\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+int handle_op_reg_reg(int pass, char *op_name, char *reg1, char *reg2)
+{
+    if (pass == 1)
+    {
+        if (
+            strcmp(op_name, "MOV") == 0 ||
+            strcmp(op_name, "mov") == 0 ||
+            strcmp(op_name, "add") == 0 ||
+            strcmp(op_name, "ADD") == 0 ||
+            strcmp(op_name, "sub") == 0 ||
+            strcmp(op_name, "SUB") == 0 ||
+            strcmp(op_name, "xor") == 0 ||
+            strcmp(op_name, "XOR") == 0 ||
+            strcmp(op_name, "CMP") == 0 ||
+            strcmp(op_name, "cmp") == 0)
+        {
+            return 2;
+        }
+        else
+        {
+            printf("Error : instruction %s doesnot support register register operation\n", op_name);
+            exit(EXIT_FAILURE);
+        }
+    }
+    else{
+        printf("Error : Pass 2 not implemented yet!\n");
         exit(EXIT_FAILURE);
     }
 }
