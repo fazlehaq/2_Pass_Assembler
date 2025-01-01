@@ -62,14 +62,13 @@ Symbol *create_symbol(char *name, int address, int section, int size,int status,
 
 // Insert a symbol into the table
 int insert_symbol(SymbolTable *symbol_table, char *name, int address, int section, int size,int status,int value) {
-    char *key = name;
-    if (g_hash_table_contains(symbol_table, key)) {
+    if (g_hash_table_contains(symbol_table, name)) {
         printf("Error: Symbol '%s' already exists in section %d'.\n", name, section);
         return 0;
     }
 
     Symbol *symbol = create_symbol(name, address, section, size,status,value);
-    g_hash_table_insert(symbol_table, g_strdup(key), symbol);
+    g_hash_table_insert(symbol_table, g_strdup(name), symbol);
 
     return 1;
 }
@@ -110,25 +109,3 @@ void free_symbol_table(SymbolTable *symbol_table) {
     g_hash_table_destroy(symbol_table);
 }
 
-
-int handle_label_declare(SymbolTable *symbol_table,char* symbol_name,int address, int status){
-    if (status == DEFINED_SYMBOL){
-        Symbol *symbol = search_symbol(symbol_table,symbol_name);
-        if(symbol && symbol->section == TEXT_SECTION){
-            symbol->address = address;
-            symbol->status = DEFINED_SYMBOL;
-            return 1;
-        }
-        else if(symbol && symbol->section != TEXT_SECTION){
-            printf("Error : Redefining symbol !\n");
-            exit(EXIT_FAILURE);
-        }
-        else {
-            int insert_symbol(SymbolTable *symbol_table, char *name, int address, int section, int size,int status,int value);
-            if(insert_symbol(symbol_table,symbol_name,address,TEXT_SECTION,0,DEFINED_SYMBOL,0)) return 1;
-            else return 0;
-        }
-    }
-
-    return 1;
-}
