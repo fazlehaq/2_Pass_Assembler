@@ -3,6 +3,7 @@
     #include<string.h>
     #include<stdlib.h>
     #include"../headers/symbol-table.h"
+    #include"../headers/routines.h"
 
     int yylex();
     void yyerror(const char *s);
@@ -10,9 +11,9 @@
     int pass; // storing the pass number 1 or 2
     int loc = 0;  // keeping track of the address / location cnt
     extern FILE *yyin;
+    extern int yyline;
     SymbolTable *symbol_table;
 %}
-
 
 %token SEC_DATA SEC_BSS SEC_TEXT
 %token NEWLINE COMMA
@@ -48,58 +49,59 @@ section: data_section
        | text_section
        ;
 
-data_section: SEC_DATA { loc = 0; printf("Parsing .data section\n"); } NEWLINE  data_lines 
+data_section: SEC_DATA { loc = 0; printf("Parsing .data section\n"); } data_lines 
             ;
 
 data_lines: data_line NEWLINE data_lines 
+          | NEWLINE data_lines
           | data_line
           |
           ;
 
 data_line: LABEL DEFINE_DATA_TYPE value {  
-                                          insert_symbol(symbol_table,$1,loc,DATA_SECTION,$2,DEFINED_SYMBOL,$3); 
-                                          loc+=$2 ; 
+                                          handle_variable_symbol(pass,symbol_table,$1,loc,DATA_SECTION,$2,DEFINED_SYMBOL,$3);
+                                        //   insert_symbol(symbol_table,$1,loc,DATA_SECTION,$2,DEFINED_SYMBOL,$3); 
+                                            loc += $2;
                                         }
          ;
 
-bss_section: SEC_BSS { loc = 0; printf("Parsing .bss section\n"); } NEWLINE bss_lines
+bss_section: SEC_BSS { loc = 0; printf("Parsing .bss section\n"); }  bss_lines
            ;
 
 bss_lines: bss_line NEWLINE bss_lines
+         | NEWLINE bss_lines
          | bss_line
          |
          ;
 
-bss_line: LABEL DECLARE_BSS_TYPE value { printf("BSS: %s %d %d\n", $1, $2 , $3); }
+bss_line: LABEL DECLARE_BSS_TYPE value { handle_variable_symbol(pass,symbol_table,$1,loc,BSS_SECTION,$2*$3,DECLARED_SYMBOL,0); loc += ($2*$3);}
         ;
 
-text_section: SEC_TEXT { loc = 0; printf("Parsing the text section\n"); } NEWLINE text_lines
+text_section: SEC_TEXT { loc = 0; printf("Parsing the text section\n"); } text_lines
         ;
 
 text_lines : text_line NEWLINE text_lines
+    | NEWLINE text_lines
     | text_line
-    | 
+    |
     ;
-
+ 
 text_line : GLOBAL LABEL
-    | LABEL_DECLARE {handle_label_declare(symbol_table,$1,loc,DEFINED_SYMBOL);} inst 
+    | LABEL_DECLARE {handle_label(pass,symbol_table,$1,loc,TEXT_SECTION,DEFINED_SYMBOL);} inst 
     | inst;
-
-
-inst : 
-    // | OPC value {
-    //     printf("opcode immediate\n"); 
-    // } 
-    // | OPC PLUS value {printf("opcode positive immediate\n");}
-    // | OPC MINUS value {printf("opcode negative immediate\n");}
-
-    | OPC LABEL {printf("opcode label\n");}
+ 
+ 
+inst : OPC 
+    | OPC LABEL { 
+        printf("opcode label\n"); 
+        int size = handle_op_label(pass,$1,$2);
+        handle_label(pass,symbol_table,$2,-1,TEXT_SECTION,UNDEFINED_SYMBOL);
+        loc += size;
+        }
     | OPC REG {printf("opcode register\n");}
 
     | OPC REG COMMA REG {printf("opcode reg reg\n");}
     | OPC OPENING_BRACKET REG CLOSING_BRACKET COMMA REG {printf("regAddress , reg\n");}
-    // | OPC OPENING_BRACKET REG PLUS value CLOSING_BRACKET COMMA REG {printf("regAddress with displacement , reg\n");}
-    // | OPC OPENING_BRACKET REG MINUS value CLOSING_BRACKET COMMA REG {printf("regAddress with negative displacement , reg\n");}
 
     | OPC REG COMMA value {printf("register immediate\n");}
     | OPC REG COMMA PLUS value {printf("Register  positive_immediate\n");}
@@ -107,29 +109,17 @@ inst :
 
     | OPC REG COMMA LABEL {printf("Register and variable\n");}
     | OPC REG COMMA OPENING_BRACKET LABEL CLOSING_BRACKET {printf("Register , label adrress");}
-    // | OPC REG COMMA OPENING_BRACKET LABEL PLUS value CLOSING_BRACKET {printf("Register , label adrress");}
-    // | OPC REG COMMA OPENING_BRACKET LABEL MINUS value CLOSING_BRACKET {printf("Register , label adrress");}
-
+    
     | OPC REG COMMA OPENING_BRACKET value CLOSING_BRACKET {printf("Register immediate_Adrresing\n");}
     | OPC REG COMMA OPENING_BRACKET REG CLOSING_BRACKET {printf("Register Register Addressing\n");}
-    // | OPC REG COMMA OPENING_BRACKET REG PLUS value CLOSING_BRACKET {printf("\n");}
-    // | OPC REG COMMA OPENING_BRACKET REG MINUS value CLOSING_BRACKET {printf("\n");}
-
+ 
     | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET 
-    // | OPC DWORD OPENING_BRACKET REG PLUS value CLOSING_BRACKET 
-    // | OPC DWORD OPENING_BRACKET REG MINUS value CLOSING_BRACKET 
-
+  
     | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA value
-    // | OPC DWORD OPENING_BRACKET REG PLUS value CLOSING_BRACKET COMMA value
-    // | OPC DWORD OPENING_BRACKET REG MINUS value CLOSING_BRACKET COMMA value
-    
+  
     | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA PLUS value
-    // | OPC DWORD OPENING_BRACKET REG PLUS value CLOSING_BRACKET COMMA PLUS value
-    // | OPC DWORD OPENING_BRACKET REG MINUS value CLOSING_BRACKET COMMA PLUS value
 
     | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA MINUS value
-    // | OPC DWORD OPENING_BRACKET REG PLUS value CLOSING_BRACKET COMMA MINUS value
-    // | OPC DWORD OPENING_BRACKET REG MINUS value CLOSING_BRACKET COMMA MINUS value
     ;
 
 value: DEC_VAL { $$ = $1;}
@@ -142,7 +132,7 @@ value: DEC_VAL { $$ = $1;}
 
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Error: %s\n", s);
+    fprintf(stderr, "Error: %s at %d\n", s,yyline);
 }
 
 int main(int argc,char *argv[]) {
