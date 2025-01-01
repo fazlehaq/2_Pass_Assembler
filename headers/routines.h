@@ -5,3 +5,4 @@ void handle_label(int pass,SymbolTable *symbol_table,char *symbol_name,int addre
 int handle_op_label(int pass,char* op_name, char* label_name);
 int handle_op_register(int pass,char* op_name,char *reg);
 int handle_op_reg_reg(int pass,char *op_name,char *reg1,char*reg2);
+int handle_reg_addr_to_reg(int pass, char *op_name, char *reg1, char *reg2);

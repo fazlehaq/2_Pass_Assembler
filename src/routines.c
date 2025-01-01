@@ -17,7 +17,8 @@ int handle_variable_symbol(int pass, SymbolTable *symbol_table, char *symbol_nam
         }
         return 1;
     }
-    else {
+    else
+    {
         printf("Error : Pass 2 not implemented yet!\n");
         exit(EXIT_FAILURE);
     }
@@ -151,8 +152,41 @@ int handle_op_reg_reg(int pass, char *op_name, char *reg1, char *reg2)
             exit(EXIT_FAILURE);
         }
     }
-    else{
+    else
+    {
         printf("Error : Pass 2 not implemented yet!\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+int handle_reg_addr_to_reg(int pass, char *op_name, char *reg1, char *reg2)
+{
+    if (pass == 1)
+    {
+
+        if (
+            strcmp("ADD", op_name) == 0 ||
+            strcmp("add", op_name) == 0 ||
+            strcmp("MOV", op_name) == 0 ||
+            strcmp("mov", op_name) == 0 ||
+            strcmp("SUB", op_name) == 0 ||
+            strcmp("sub", op_name) == 0 ||
+            strcmp("XOR", op_name) == 0 ||
+            strcmp("xor", op_name) == 0 ||
+            strcmp("cmp", op_name) == 0 ||
+            strcmp("CMP", op_name) == 0)
+        {
+            return 2;
+        }
+        else
+        {
+            printf("Instruction %s doesnot support r/m32 , r32 operation\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    else if (pass == 2)
+    {
+        printf("Pass 2 not implemented yet\n");
         exit(EXIT_FAILURE);
     }
 }
