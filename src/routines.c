@@ -3,6 +3,7 @@
 #include <string.h>
 #include "../headers/routines.h"
 #include "../headers/symbol-table.h"
+#include "../headers/utils.h"
 
 int handle_variable_symbol(int pass, SymbolTable *symbol_table, char *symbol_name, int address, int section, int size, int status, int value)
 {
@@ -316,4 +317,33 @@ int handle_reg_to_label_address(int pass,char* op_name, char *reg1, char* label_
     }
 
     return 0;   
+}
+
+int handle_reg_to_immd_address(int pass,char *op_name,char *reg1,int value){
+    if(! check_number_size((long) value,4)){
+        printf("Error : Exceeding limit :\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if(pass == 1){
+        
+        if(strcmp(op_name,"mov") == 0 || strcmp(op_name,"MOV") == 0 ) 
+            return 5;
+        if(
+            strcmp(op_name , "add") == 0 || strcmp(op_name , "ADD") == 0  ||
+            strcmp(op_name , "sub") == 0 || strcmp(op_name , "SUB") == 0  ||
+            strcmp(op_name , "xor") == 0 || strcmp(op_name , "XOR") == 0  ||
+            strcmp(op_name , "cmp") == 0 || strcmp(op_name , "CMP") == 0  
+        ){
+            return 6;
+        }
+
+    }
+    else if (pass == 2)
+    {
+        printf("Error : Pass 2 not implemented yet!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return 0;
 }

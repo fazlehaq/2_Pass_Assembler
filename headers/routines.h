@@ -7,4 +7,6 @@ int handle_op_register(int pass,char* op_name,char *reg);
 int handle_op_reg_reg(int pass,char *op_name,char *reg1,char*reg2);
 int handle_reg_addr_to_reg(int pass, char *op_name, char *reg1, char *reg2);
 int handle_reg_to_immd_val(int pass,char *op_name,char *reg1,int value);
+int handle_reg_to_label(int pass,char *op_name,char *reg1,char *label_name);
 int handle_reg_to_label_address(int pass,char* op_name, char *reg1, char* label_name);
+int handle_reg_to_immd_address(int pass,char *op_name,char *reg1,int value);
