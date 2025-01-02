@@ -347,3 +347,70 @@ int handle_reg_to_immd_address(int pass,char *op_name,char *reg1,int value){
 
     return 0;
 }
+
+int handle_reg_to_reg_address(int pass,char *op_name,char* reg1,char *reg2){
+    if(pass == 1){
+        if(
+            strcmp(op_name,"mov") || strcmp(op_name,"MOV") ||
+            strcmp(op_name,"add") || strcmp(op_name,"ADD") ||
+            strcmp(op_name,"sub") || strcmp(op_name,"SUB") ||
+            strcmp(op_name,"xor") || strcmp(op_name,"XOR") ||
+            strcmp(op_name,"cmp") || strcmp(op_name,"CMP") 
+        ){
+            return 2;
+        }
+        else{
+            printf("Error : %s doesnot support r to r/m32 operation\n",op_name);
+            exit(EXIT_FAILURE);
+        }
+    }
+    else if (pass == 2){
+        printf("Error : Pass2 not implemented yet\n");
+        exit(EXIT_FAILURE);
+    }
+    return 0;
+}
+
+int handle_op_reg_addr(int pass,char *op_name,char *reg1){
+    if(pass == 1){
+        if(
+            strcmp("inc",op_name) == 0 || strcmp("INC",op_name) == 0 ||
+            strcmp("dec",op_name) == 0 || strcmp("DEC",op_name) == 0 ||
+            strcmp("mul",op_name) == 0 || strcmp("MUL",op_name) == 0 ||
+            strcmp("div",op_name) == 0 || strcmp("DIV",op_name) == 0 
+        ){
+            return 2;
+        }
+        else {
+            printf("Error : %s doesnot support reg-memory operation\n!",op_name);
+            exit(EXIT_FAILURE); 
+        }
+    }else if(pass ==2 ){
+        printf("Error : Pass 2 not implemented yet!\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+int handle_dword_reg_addr_to_immd(int pass,char *op_name,char *reg1,int value){
+    if (pass == 1) {
+        if  (
+            strcmp(op_name,"mov") || strcmp(op_name,"MOV") ||
+            strcmp(op_name,"add") || strcmp(op_name,"ADD") ||
+            strcmp(op_name,"sub") || strcmp(op_name,"SUB") ||
+            strcmp(op_name,"xor") || strcmp(op_name,"XOR") ||
+            strcmp(op_name,"cmp") || strcmp(op_name,"CMP") 
+        ){
+            return 6;
+        }
+        else{
+            printf("Error : %s doesnot support r/m32 to immd operation\n",op_name);
+            exit(EXIT_FAILURE);
+        }
+    }
+    else if(pass ==2 )
+    {
+        printf("Error : Pass 2 not implemented yet!\n");
+        exit(EXIT_FAILURE);
+    }
+    return 0;
+}

@@ -152,18 +152,30 @@ inst : OPC
     
     | OPC REG COMMA OPENING_BRACKET value CLOSING_BRACKET {
         printf("Register immediate_Adrresing\n");
-
         loc += handle_reg_to_immd_address(pass,$1,$2,$5);
     }
-    | OPC REG COMMA OPENING_BRACKET REG CLOSING_BRACKET {printf("Register Register Addressing\n");}
+    | OPC REG COMMA OPENING_BRACKET REG CLOSING_BRACKET {
+        printf("Register Register Addressing\n");
+        loc += handle_reg_to_reg_address(pass,$1,$2,$5);
+    }
  
-    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET 
+    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET {
+        printf("Single operand Register addressing\n");
+        loc += handle_op_reg_addr(pass,$1,$4);
+    }
   
-    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA value
+    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA value {
+        printf("Dword Reg_Memory to immd \n");
+        loc += handle_dword_reg_addr_to_immd(pass,$1,$4,$7);
+    }
   
-    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA PLUS value
+    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA PLUS value{
+        loc += handle_dword_reg_addr_to_immd(pass,$1,$4,$8);
+    }
 
-    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA MINUS value
+    | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA MINUS value{
+        loc += handle_dword_reg_addr_to_immd(pass,$1,$4,$8);
+    }
     ;
 
 value: DEC_VAL { $$ = $1;}
