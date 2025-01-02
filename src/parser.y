@@ -113,12 +113,42 @@ inst : OPC
         loc += handle_reg_addr_to_reg(pass,$1,$3,$6);
     }
 
-    | OPC REG COMMA value {printf("register immediate\n");}
-    | OPC REG COMMA PLUS value {printf("Register  positive_immediate\n");}
-    | OPC REG COMMA MINUS value {printf("Register negative_immediate\n");}
+    | OPC REG COMMA value {
+        printf("register immediate\n");
+        loc += handle_reg_to_immd_val(pass,$1,$2,$4);
+    }
+    | OPC REG COMMA PLUS value {
+        printf("Register  positive_immediate\n");
+        loc += handle_reg_to_immd_val(pass,$1,$2,$5);
+    }
+    | OPC REG COMMA MINUS value {
+        printf("Register negative_immediate\n");
+        loc += handle_reg_to_immd_val(pass,$1,$2,-1 * $5);
+    }
 
-    | OPC REG COMMA LABEL {printf("Register and variable\n");}
-    | OPC REG COMMA OPENING_BRACKET LABEL CLOSING_BRACKET {printf("Register , label adrress");}
+    // interpreted as reg - imm32
+    | OPC REG COMMA LABEL {
+        printf("Register and variable\n");
+        Symbol *symbol = search_symbol(symbol_table,$4);
+        
+        if(!symbol) {
+            printf("Error : Undefined symbol %s\n",$4);
+            exit(EXIT_FAILURE);
+        }
+
+        loc +=handle_reg_to_label(pass,$1,$2,$4);
+    }
+    | OPC REG COMMA OPENING_BRACKET LABEL CLOSING_BRACKET {
+        printf("Register , label adrress");
+        
+        Symbol *symbol = search_symbol(symbol_table,$5);
+        if(!symbol) {
+            printf("Error : Undefined symbol %s\n",$5);
+            exit(EXIT_FAILURE);
+        }
+
+        loc += handle_reg_to_label_address(pass,$1,$2,$5);
+    }
     
     | OPC REG COMMA OPENING_BRACKET value CLOSING_BRACKET {printf("Register immediate_Adrresing\n");}
     | OPC REG COMMA OPENING_BRACKET REG CLOSING_BRACKET {printf("Register Register Addressing\n");}
