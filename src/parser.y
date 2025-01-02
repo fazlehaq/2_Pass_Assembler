@@ -150,7 +150,11 @@ inst : OPC
         loc += handle_reg_to_label_address(pass,$1,$2,$5);
     }
     
-    | OPC REG COMMA OPENING_BRACKET value CLOSING_BRACKET {printf("Register immediate_Adrresing\n");}
+    | OPC REG COMMA OPENING_BRACKET value CLOSING_BRACKET {
+        printf("Register immediate_Adrresing\n");
+
+        loc += handle_reg_to_immd_address(pass,$1,$2,$5);
+    }
     | OPC REG COMMA OPENING_BRACKET REG CLOSING_BRACKET {printf("Register Register Addressing\n");}
  
     | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET 
