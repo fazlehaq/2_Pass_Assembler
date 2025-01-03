@@ -29,7 +29,7 @@ COMMENT ;.*
 d[bwdq]              { yylval.i = get_size_in_bytes(yytext[1]); return DEFINE_DATA_TYPE;}
 res[bwdq]            { yylval.i = get_size_in_bytes(yytext[strlen(yytext)-1]); return DECLARE_BSS_TYPE;}
 
-{REGS}                 { printf("Register %s\n",yytext); yylval.s = strndup(yytext,strlen(yytext)); return REG;}
+{REGS}                 { yylval.s = strndup(yytext,strlen(yytext)); return REG;}
 
 MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { yylval.s= strndup(yytext,strlen(yytext)); return OPC; }
 

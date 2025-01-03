@@ -92,7 +92,7 @@ int handle_op_label(int pass,SymbolTable *symbol_table,int curr_address, char *o
     }else if(pass == 2){
         char *encoding = (char *) malloc(2+1+8+1+1);
         Symbol *symbol = search_symbol(symbol_table,label_name);
-        char opcode;
+        unsigned char opcode;
         
         if (strcmp(op_name, "jz") == 0 || strcmp(op_name, "JZ") == 0) {
             opcode = 0x74;
@@ -105,7 +105,7 @@ int handle_op_label(int pass,SymbolTable *symbol_table,int curr_address, char *o
         }
     
         char displcement = (char) ((symbol -> address) - (curr_address + 2));
-        snprintf(encoding,2+1+8+1+1,"%02X%02X",opcode,(unsigned char)displcement);
+        snprintf(encoding,2+1+8+1+1,"%02X%02X",(unsigned char)opcode,(unsigned char)displcement);
         printf("%s\n",encoding);
         free(encoding);
     }
@@ -159,7 +159,7 @@ int handle_op_register(int pass, char *op_name, char *reg)
             char *reg_bits = "100";
             char *rm_bits = get_register_encoding(reg); 
             unsigned char mod_byte = make_mod_rm_byte(mod_bits, reg_bits, rm_bits);
-            snprintf(encoding, 5, "%02X%02X", 0xF7, mod_byte);
+            snprintf(encoding, 5, "%02X%02X",0xF7, mod_byte);
         }
         else if (strcmp(op_name, "DIV") == 0 || strcmp(op_name, "div") == 0)
         {
@@ -207,10 +207,30 @@ int handle_op_reg_reg(int pass, char *op_name, char *reg1, char *reg2)
             exit(EXIT_FAILURE);
         }
     }
-    else
-    {
-        printf("Error : Pass 2 not implemented yet!\n");
-        exit(EXIT_FAILURE);
+    else if(pass == 2)
+    {   
+        char *encoding = (char *) malloc(5);
+        unsigned char opcode;
+        char *mod_bits = "11";
+        char *reg_bits = get_register_encoding(reg2) ;
+        char *rm_bits = get_register_encoding(reg1);
+
+        if ( strcmp(op_name, "MOV") == 0 || strcmp(op_name, "mov") == 0 ) 
+            opcode = 0x89;
+        else if (strcmp(op_name, "ADD") == 0 || strcmp(op_name, "add") == 0)
+            opcode = 0X01;
+        else if (strcmp(op_name, "SUB") == 0 || strcmp(op_name, "sub") == 0)
+            opcode = 0X29;  
+        else if (strcmp(op_name, "CMP") == 0 || strcmp(op_name, "cmp") == 0)
+            opcode = 0X39;
+        else if (strcmp(op_name, "XOR") == 0 || strcmp(op_name, "xor") == 0)
+            opcode = 0X31;
+
+
+        unsigned char mod_byte = make_mod_rm_byte(mod_bits,reg_bits,rm_bits);
+        snprintf(encoding,5,"%02X%02X",opcode,mod_byte);
+        printf("%s\n",encoding);
+        free(encoding);
     }
 }
 
