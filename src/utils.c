@@ -82,3 +82,51 @@ int strip_extra_chars(char *str) {
     }
     return len;
 }
+
+
+int get_register_number(char *reg){
+    if (strcmp(reg,"eax") == 0)
+        return 0;
+    if (strcmp(reg,"ecx") == 0)
+        return 1;
+    if (strcmp(reg,"edx") == 0)
+        return 2;
+    if (strcmp(reg,"ebx") == 0)
+        return 3;
+    if (strcmp(reg,"esp") == 0)
+        return 4;
+    if (strcmp(reg,"ebp") == 0)
+        return 5;
+    if(strcmp(reg,"esi") == 0)
+        return 6;
+    if (strcmp(reg,"edi") == 0)
+        return 7;
+
+    printf("Error : Invalid input \n");
+    return -1;
+}
+
+char* get_register_encoding(char *reg){
+    if (strcmp(reg,"eax") == 0)
+        return "000";
+    if (strcmp(reg,"ecx") == 0)
+        return "001";
+    if (strcmp(reg,"edx") == 0)
+        return "010";
+    if (strcmp(reg,"ebx") == 0)
+        return "011";
+    if (strcmp(reg,"esp") == 0)
+        return "100";
+    if (strcmp(reg,"ebp") == 0)
+        return "101";
+    if(strcmp(reg,"esi") == 0)
+        return "110";
+    if (strcmp(reg,"edi") == 0)
+        return "111";
+}
+
+unsigned char make_mod_rm_byte(char* mod,char* reg,char* rm){
+    char mod_byte_str[12];
+    snprintf(mod_byte_str,sizeof(mod_byte_str),"0b%s%s%s",mod,reg,rm);
+    return (unsigned char) parsenum(mod_byte_str);
+}
