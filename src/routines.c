@@ -90,24 +90,24 @@ int handle_op_label(int pass,SymbolTable *symbol_table,int curr_address, char *o
         printf("Error : Invalid use of label : %s\n", label_name);
         exit(EXIT_FAILURE);
     }else if(pass == 2){
-            char *encoding = (char *) malloc(2+1+8+1+1);
-            Symbol *symbol = search_symbol(symbol_table,label_name);
-            char opcode;
-            
-            if (strcmp(op_name, "jz") == 0 || strcmp(op_name, "JZ") == 0) {
-                opcode = 0x74;
-            }
-            else if (strcmp(op_name, "jnz") == 0 || strcmp(op_name, "JNZ") == 0) {
-                opcode = 0x75;
-            }
-            else if (strcmp(op_name, "jz") == 0 || strcmp(op_name, "JZ") == 0) {
-                opcode = 0xEB;
-            }
-
-            char displcement = (char) ((symbol -> address) - (curr_address + 2));
-            snprintf(encoding,2+1+8+1+1,"%02X%02X",opcode,(unsigned char)displcement);
-            printf("%s\n",encoding);
-            free(encoding);
+        char *encoding = (char *) malloc(2+1+8+1+1);
+        Symbol *symbol = search_symbol(symbol_table,label_name);
+        char opcode;
+        
+        if (strcmp(op_name, "jz") == 0 || strcmp(op_name, "JZ") == 0) {
+            opcode = 0x74;
+        }
+        else if (strcmp(op_name, "jnz") == 0 || strcmp(op_name, "JNZ") == 0) {
+            opcode = 0x75;
+        }
+        else if (strcmp(op_name, "jz") == 0 || strcmp(op_name, "JZ") == 0) {
+            opcode = 0xEB;
+        }
+    
+        char displcement = (char) ((symbol -> address) - (curr_address + 2));
+        snprintf(encoding,2+1+8+1+1,"%02X%02X",opcode,(unsigned char)displcement);
+        printf("%s\n",encoding);
+        free(encoding);
     }
 }
 
@@ -177,10 +177,7 @@ int handle_op_register(int pass, char *op_name, char *reg)
             return;
         }
 
-        // Output the encoding
         printf("Encoding: %s\n", encoding);
-
-        // Free allocated memory
         free(encoding);
     }
     return 0;
