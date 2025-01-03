@@ -206,5 +206,9 @@ int main(int argc,char *argv[]) {
     }
     pass = 1;
     yyparse();
+    fclose(yyin);
     display_symbol_table(symbol_table);
+    pass = 2;
+    yyin = fopen(argv[1],"r");
+    yyparse();
 }
