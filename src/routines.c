@@ -69,29 +69,46 @@ void handle_label(int pass, SymbolTable *symbol_table, char *symbol_name, int ad
             exit(EXIT_FAILURE);
         }
     }
-    else if (pass == 2)
-    {
-        printf("Not implemented yet!\n");
-        exit(EXIT_FAILURE);
-    }
 }
 
 // checks if inst is valid and returns the size of inst
-int handle_op_label(int pass, char *op_name, char *label_name)
+int handle_op_label(int pass,SymbolTable *symbol_table,int curr_address, char *op_name, char *label_name)
 {
-    if (
-        strcmp(op_name, "jmp") == 0 ||
-        strcmp(op_name, "jz") == 0 ||
-        strcmp(op_name, "jnz") == 0 ||
-        strcmp(op_name, "JMP") == 0 ||
-        strcmp(op_name, "JZ") == 0 ||
-        strcmp(op_name, "JNZ") == 0)
-    {
-        // assumption is that jmps will be relative 8 bits only
-        return 2;
+    if(pass == 1) {
+
+        if (
+            strcmp(op_name, "jmp") == 0 ||
+            strcmp(op_name, "jz") == 0 ||
+            strcmp(op_name, "jnz") == 0 ||
+            strcmp(op_name, "JMP") == 0 ||
+            strcmp(op_name, "JZ") == 0 ||
+            strcmp(op_name, "JNZ") == 0)
+        {
+            // assumption is that jmps will be relative 8 bits only
+            return 2;
+        }
+        printf("Error : Invalid use of label : %s\n", label_name);
+        exit(EXIT_FAILURE);
+    }else if(pass == 2){
+            char *encoding = (char *) malloc(2+1+8+1+1);
+            Symbol *symbol = search_symbol(symbol_table,label_name);
+            char opcode;
+            
+            if (strcmp(op_name, "jz") == 0 || strcmp(op_name, "JZ") == 0) {
+                opcode = 0x74;
+            }
+            else if (strcmp(op_name, "jnz") == 0 || strcmp(op_name, "JNZ") == 0) {
+                opcode = 0x75;
+            }
+            else if (strcmp(op_name, "jz") == 0 || strcmp(op_name, "JZ") == 0) {
+                opcode = 0xEB;
+            }
+
+            char displcement = (char) ((symbol -> address) - (curr_address + 2));
+            snprintf(encoding,2+1+8+1+1,"%02X%02X",opcode,(unsigned char)displcement);
+            printf("%s\n",encoding);
+            free(encoding);
     }
-    printf("Error : Invalid use of label : %s\n", label_name);
-    exit(EXIT_FAILURE);
 }
 
 int handle_op_register(int pass, char *op_name, char *reg)

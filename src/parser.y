@@ -94,7 +94,7 @@ text_line : GLOBAL LABEL
 inst : OPC 
     | OPC LABEL { 
         printf("opcode label\n"); 
-        int size = handle_op_label(pass,$1,$2);
+        int size = handle_op_label(pass,symbol_table,loc,$1,$2);
         handle_label(pass,symbol_table,$2,-1,TEXT_SECTION,UNDEFINED_SYMBOL);
         loc += size;
         }
