@@ -118,7 +118,7 @@ int handle_op_label(int pass, SymbolTable *symbol_table, FILE *lst_file, int cur
             opcode = 0x74;
         else if (strcmp(op_name, "jnz") == 0)
             opcode = 0x75;
-        else if (strcmp(op_name, "jz") == 0)
+        else if (strcmp(op_name, "jmp") == 0)
             opcode = 0xEB;
 
         char displcement = (char)((symbol->address) - (curr_address + 2));
@@ -284,30 +284,30 @@ int handle_reg_to_immd_val(int pass, FILE *lst_file, char *op_name, char *reg1, 
 {
 
     int inst_size;
+    int byte_size = get_number_size(value);
+        // for any imm value mov B8 +rd id
 
-    if (strcmp(reg1, "eax") == 0)
-    {
-        if (
-            strcmp(op_name, "add") == 0 ||
-            strcmp(op_name, "sub") == 0 ||
-            strcmp(op_name, "cmp") == 0 ||
-            strcmp(op_name, "xor") == 0)
-        {
-            inst_size = 5;
-        }
-    }
-    // mov -> 5 bytes , add -> 6 , sub -> 6 , xor -> 6 , cmp -> 6
-    else if (strcmp("mov", op_name) == 0)
+        // eax
+        // add -> 1B -> 83 Modrm ib | -> 2B -> 05 id
+        // sub -> 1B -> 83 Modrm ib | -> 2B -> 2D id
+        // cmp -> 1b -> 83 Modrm ib | -> 2B -> 3D id
+        // xor -> 1B -> 83 modrm ib | -> 2B -> 35 id
+
+        // any other reg
+        // add -> 1B -> 83 Modrm ib | -> 2B ->  81 modrm id
+        // sub -> 1B -> 83 Modrm ib | -> 2B -> 81 modrm id
+        // cmp -> 1B -> 83 Modrm ib | -> 2B -> 81 modrm id
+        // xor -> 1B -> 83 Modrm ib | -> 2B -> 81 modrm id 
+    
+    if (strcmp("mov",op_name) == 0)
         inst_size = 5;
-
-    else if (
-        strcmp("add", op_name) == 0 ||
-        strcmp("sub", op_name) == 0 ||
-        strcmp("xor", op_name) == 0 ||
-        strcmp("cmp", op_name) == 0)
-    {
+    else if(byte_size == 1)
+        inst_size = 3;
+    else if (strcmp("eax",reg1) ==0 && byte_size > 1)
+        inst_size = 5;
+    else if(strcmp("eax",reg1)!=0) 
         inst_size = 6;
-    }
+
 
     else
     {
