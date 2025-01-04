@@ -29,9 +29,9 @@ COMMENT ;.*
 d[bwdq]              { yylval.i = get_size_in_bytes(yytext[1]); return DEFINE_DATA_TYPE;}
 res[bwdq]            { yylval.i = get_size_in_bytes(yytext[strlen(yytext)-1]); return DECLARE_BSS_TYPE;}
 
-{REGS}                 { yylval.s = strndup(yytext,strlen(yytext)); return REG;}
+{REGS}                 { yylval.s = to_lowercase_in_place(strndup(yytext,strlen(yytext))); return REG;}
 
-MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { yylval.s= strndup(yytext,strlen(yytext)); return OPC; }
+MOV|ADD|SUB|DIV|MUL|XOR|JMP|JZ|JNZ|CMP|INC|DEC|NOT|AND|OR  { yylval.s= to_lowercase_in_place(strndup(yytext,strlen(yytext))); return OPC; }
 
 {global}            { return GLOBAL;}
 
@@ -50,7 +50,7 @@ dword               {return DWORD;}
 0[bB][0-1]+         {yylval.i = parsenum(yytext); return BIN_VAL;}
 
 {APLHNUM}[ \t]*:  { yylval.s = strndup(yytext,strip_extra_chars(yytext)); return LABEL_DECLARE;}
-{APLHNUM}          { printf("label %s\n",yytext); yylval.s= strndup(yytext,strlen(yytext)); return LABEL;}
+{APLHNUM}          {yylval.s= strndup(yytext,strlen(yytext)); return LABEL;}
 
 \n                  {yyline++; return NEWLINE;}
 [ \t]               { /* ignore white spaces */ }

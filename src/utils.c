@@ -58,6 +58,21 @@ int check_number_size(long number, int size) {
     return (number >= min && number <= max);
 }
 
+int get_number_size(int number) {
+    if (number <= 127 && number >= -128){
+        return 1;
+    }
+
+    if(number <= 32767 && number >= -32768){
+        return 2;
+    }
+
+    if(number <= 2147483647L && number >= -2147483648L){
+        return 4;
+    }
+
+    printf("Error : Number greater than 32 bits");
+}
 
 
 int parsenum(char *num_str){
@@ -129,4 +144,33 @@ unsigned char make_mod_rm_byte(char* mod,char* reg,char* rm){
     char mod_byte_str[12];
     snprintf(mod_byte_str,sizeof(mod_byte_str),"0b%s%s%s",mod,reg,rm);
     return (unsigned char) parsenum(mod_byte_str);
+}
+
+void to_little_endian(char *buffer,int value,int size){
+    for (int i=0 ; i<size; i++){
+        sprintf( buffer+(i*2),"%02X",((value >> (8*i)) & 0XFF));
+    }
+}
+
+void to_lowercase(char *ip,char *op){
+    if (ip == NULL) return;
+    int i;
+    for ( i = 0; ip[i] != '\0'; i++) {
+        if (ip[i] >= 'A' && ip[i] <= 'Z') { // Check if the character is uppercase
+            op[i] = ip[i] + ('a' - 'A');
+        }
+    }
+    op[i] = '\0';
+}
+
+char * to_lowercase_in_place(char *str) {
+    if (str == NULL) return NULL;
+
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] >= 'A' && str[i] <= 'Z') { // Check if the character is uppercase
+            str[i] = str[i] + ('a' - 'A');
+        }
+    }
+
+    return str;
 }

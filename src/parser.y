@@ -10,9 +10,16 @@
 
     int pass; // storing the pass number 1 or 2
     int loc = 0;  // keeping track of the address / location cnt
+    FILE *lst_file;
     extern FILE *yyin;
     extern int yyline;
     SymbolTable *symbol_table;
+
+    void newline(){
+        if(pass == 2){
+            fprintf(lst_file,"\n");
+        }
+    }
 %}
 
 %token SEC_DATA SEC_BSS SEC_TEXT
@@ -49,132 +56,150 @@ section: data_section
        | text_section
        ;
 
-data_section: SEC_DATA { loc = 0; printf("Parsing .data section\n"); } data_lines 
+data_section: SEC_DATA { loc = 0; } data_lines 
             ;
 
-data_lines: data_line NEWLINE data_lines 
-          | NEWLINE data_lines
+data_lines: data_line NEWLINE {newline();} data_lines 
+          | NEWLINE {newline();} data_lines
           | data_line
           |
           ;
 
 data_line: LABEL DEFINE_DATA_TYPE value {  
-                                          handle_variable_symbol(pass,symbol_table,$1,loc,DATA_SECTION,$2,DEFINED_SYMBOL,$3);
-                                        //   insert_symbol(symbol_table,$1,loc,DATA_SECTION,$2,DEFINED_SYMBOL,$3); 
-                                            loc += $2;
-                                        }
-         ;
+        if(pass == 2)
+          fprintf(lst_file,"%d %08X ",yyline,loc);
+        handle_variable_symbol(pass,symbol_table,lst_file,$1,loc,DATA_SECTION,$2,DEFINED_SYMBOL,$3);
+        loc += $2;
+    }
+    ;
 
-bss_section: SEC_BSS { loc = 0; printf("Parsing .bss section\n"); }  bss_lines
+bss_section: SEC_BSS { loc = 0;  }  bss_lines
            ;
 
-bss_lines: bss_line NEWLINE bss_lines
-         | NEWLINE bss_lines
+bss_lines: bss_line NEWLINE {newline();} bss_lines
+         | NEWLINE{newline();} bss_lines
          | bss_line
          |
          ;
 
-bss_line: LABEL DECLARE_BSS_TYPE value { handle_variable_symbol(pass,symbol_table,$1,loc,BSS_SECTION,$2*$3,DECLARED_SYMBOL,0); loc += ($2*$3);}
+bss_line: LABEL DECLARE_BSS_TYPE value { 
+    if(pass == 2)
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+    handle_variable_symbol(pass,symbol_table,lst_file,$1,loc,BSS_SECTION,$2*$3,DECLARED_SYMBOL,0); loc += ($2*$3);
+    }
+    ;
+
+text_section: SEC_TEXT { loc = 0; } text_lines
         ;
 
-text_section: SEC_TEXT { loc = 0; printf("Parsing the text section\n"); } text_lines
-        ;
-
-text_lines : text_line NEWLINE text_lines
-    | NEWLINE text_lines
+text_lines : text_line NEWLINE {newline();} text_lines
+    | NEWLINE {newline();} text_lines
     | text_line
     |
     ;
  
-text_line : GLOBAL LABEL
+text_line : GLOBAL LABEL 
     | LABEL_DECLARE {handle_label(pass,symbol_table,$1,loc,TEXT_SECTION,DEFINED_SYMBOL);} inst 
     | inst;
  
  
-inst : OPC 
-    | OPC LABEL { 
-        printf("opcode label\n"); 
-        int size = handle_op_label(pass,symbol_table,loc,$1,$2);
+inst :  
+    OPC LABEL { 
+        if(pass == 2)
+            fprintf(lst_file,"%d %08X ",yyline,loc);
+        int size = handle_op_label(pass,symbol_table,lst_file,loc,$1,$2);
         handle_label(pass,symbol_table,$2,-1,TEXT_SECTION,UNDEFINED_SYMBOL);
         loc += size;
-        }
+    }
 
     | OPC REG {
-        // printf("opcode register\n");
-        loc += handle_op_register(pass,$1,$2);
+        if(pass == 2)
+            fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_op_register(pass,lst_file,$1,$2);
     }
 
     | OPC REG COMMA REG {
-        // printf("opcode reg reg\n");
-        loc += handle_op_reg_reg(pass,$1,$2,$4);
+        if(pass == 2)
+            fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_op_reg_reg(pass,lst_file,$1,$2,$4);
     }
     | OPC OPENING_BRACKET REG CLOSING_BRACKET COMMA REG {
-        printf("regAddress , reg\n");
-        loc += handle_reg_addr_to_reg(pass,$1,$3,$6);
+        if(pass == 2)        
+            fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_reg_addr_to_reg(pass,lst_file,$1,$3,$6);
     }
 
     | OPC REG COMMA value {
-        printf("register immediate\n");
-        loc += handle_reg_to_immd_val(pass,$1,$2,$4);
+        if(pass == 2)        
+            fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_reg_to_immd_val(pass,lst_file,$1,$2,$4);
     }
     | OPC REG COMMA PLUS value {
-        printf("Register  positive_immediate\n");
-        loc += handle_reg_to_immd_val(pass,$1,$2,$5);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_reg_to_immd_val(pass,lst_file,$1,$2,$5);
     }
     | OPC REG COMMA MINUS value {
-        printf("Register negative_immediate\n");
-        loc += handle_reg_to_immd_val(pass,$1,$2,-1 * $5);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_reg_to_immd_val(pass,lst_file,$1,$2,-1 * $5);
     }
 
-    // interpreted as reg - imm32
     | OPC REG COMMA LABEL {
-        printf("Register and variable\n");
         Symbol *symbol = search_symbol(symbol_table,$4);
         
         if(!symbol) {
-            printf("Error : Undefined symbol %s\n",$4);
             exit(EXIT_FAILURE);
         }
-
-        loc +=handle_reg_to_label(pass,$1,$2,$4);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc +=handle_reg_to_label(pass,symbol_table,lst_file,$1,$2,$4);
     }
     | OPC REG COMMA OPENING_BRACKET LABEL CLOSING_BRACKET {
-        printf("Register , label adrress");
         
         Symbol *symbol = search_symbol(symbol_table,$5);
         if(!symbol) {
             printf("Error : Undefined symbol %s\n",$5);
             exit(EXIT_FAILURE);
         }
-
-        loc += handle_reg_to_label_address(pass,$1,$2,$5);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_reg_to_label_address(pass,symbol_table,lst_file,$1,$2,$5);
     }
     
     | OPC REG COMMA OPENING_BRACKET value CLOSING_BRACKET {
-        printf("Register immediate_Adrresing\n");
-        loc += handle_reg_to_immd_address(pass,$1,$2,$5);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_reg_to_immd_address(pass,lst_file,$1,$2,$5);
     }
     | OPC REG COMMA OPENING_BRACKET REG CLOSING_BRACKET {
-        printf("Register Register Addressing\n");
-        loc += handle_reg_to_reg_address(pass,$1,$2,$5);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_reg_to_reg_address(pass,lst_file,$1,$2,$5);
     }
  
     | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET {
-        printf("Single operand Register addressing\n");
-        loc += handle_op_reg_addr(pass,$1,$4);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_op_reg_addr(pass,lst_file,$1,$4);
     }
   
     | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA value {
-        printf("Dword Reg_Memory to immd \n");
-        loc += handle_dword_reg_addr_to_immd(pass,$1,$4,$7);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_dword_reg_addr_to_immd(pass,lst_file,$1,$4,$7);
     }
   
     | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA PLUS value{
-        loc += handle_dword_reg_addr_to_immd(pass,$1,$4,$8);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_dword_reg_addr_to_immd(pass,lst_file,$1,$4,$8);
     }
 
     | OPC DWORD OPENING_BRACKET REG CLOSING_BRACKET COMMA MINUS value{
-        loc += handle_dword_reg_addr_to_immd(pass,$1,$4,$8);
+        if(pass == 2)        
+        fprintf(lst_file,"%d %08X ",yyline,loc);
+        loc += handle_dword_reg_addr_to_immd(pass,lst_file,$1,$4,$8);
     }
     ;
 
@@ -209,6 +234,8 @@ int main(int argc,char *argv[]) {
     fclose(yyin);
     display_symbol_table(symbol_table);
     pass = 2;
+    yyline = 1;
     yyin = fopen(argv[1],"r");
+    lst_file = fopen("out.lst","w");
     yyparse();
 }
