@@ -17,7 +17,10 @@ parser.y: src/parser.y src/scanner.l
 	@bison -d -Wcounterexamples src/parser.y -o src/parser.tab.c
 	@flex -o src/lex.yy.c src/scanner.l
 
-assembler.o: parser.y obj/utils.o  obj/symbol-table.o obj/routines.o
+obj-dir: 
+	@mkdir -p obj
+
+assembler.o: obj-dir parser.y obj/utils.o  obj/symbol-table.o obj/routines.o
 	@gcc $(CFLAGS)  src/parser.tab.c src/lex.yy.c obj/symbol-table.o obj/utils.o obj/routines.o -o obj/assembler.o -lfl $(LDFLAGS)
 
 main: assembler.o
