@@ -9,3 +9,11 @@ void to_little_endian(char *buffer,int value,int size);
 int get_number_size(int number);
 char * to_lowercase_in_place(char *str);
 void to_lowercase(char *ip,char *op);
+void append_file(FILE *dest,FILE *src);
+void ensure_file_opened(FILE *fp,char *filename);
+union type_conversion
+{
+    int i;
+    unsigned int ui;
+    char byte[4];
+};

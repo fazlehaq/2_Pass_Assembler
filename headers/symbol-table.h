@@ -18,17 +18,26 @@ typedef struct Symbol {
     int section;
     int size;
     int status;
-    int value;
+    int id;
 } Symbol;
 
-typedef GHashTable SymbolTable;
+// typedef GHashTable SymbolTable;
+typedef struct SymbolTable {
+    GHashTable *table; // For fast lookup by name
+    GList *sorted_list; // For maintaining sorted order by ID
+} SymbolTable;
+
 
 SymbolTable* init_symbol_table();
 int is_symbol_exists(SymbolTable *symbol_table,char *symbol_name);
-Symbol *create_symbol(char *name, int address, int section, int size,int status,int value) ;
-int insert_symbol(SymbolTable *symbol_table, char *name, int address, int section, int size,int status,int value);
+Symbol *create_symbol(char *name, int address, int section, int size,int status, int id) ;
+int insert_symbol(SymbolTable *symbol_table, char *name, int address, int section, int size,int status);
 Symbol *search_symbol(SymbolTable *symbol_table, char *name);
 void display_symbol_table(SymbolTable *symbol_table);
 void free_symbol_table(SymbolTable *symbol_table);
+
+int extract_symbols_in_file(SymbolTable *symbol_table,FILE *symbt_file);
+
+
 
 #endif 

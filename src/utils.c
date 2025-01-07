@@ -174,3 +174,35 @@ char * to_lowercase_in_place(char *str) {
 
     return str;
 }
+
+void append_file(FILE *dest, FILE *src) {
+    const size_t BUFFER_SIZE = 512; // Use a named constant for buffer size
+    char *buffer = (char *)malloc(BUFFER_SIZE);
+    if (!buffer) {
+        perror("Error: Unable to allocate buffer");
+        exit(EXIT_FAILURE);
+    }
+
+    size_t bytes_read;
+    while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, src)) > 0) {
+        size_t bytes_written = fwrite(buffer, 1, bytes_read, dest);
+        if (bytes_written != bytes_read) {
+            perror("Error: Unable to write to destination file");
+            free(buffer); // Free the buffer before exiting
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if (ferror(src)) {
+        perror("Error: Unable to read from source file");
+    }
+
+    free(buffer); // Free the buffer after use
+}
+
+void ensure_file_opened(FILE *fp,char *filename){
+    if(!fp){
+        printf("Error : Could not open file : %s\n",filename);
+        exit(EXIT_FAILURE);
+    }
+}

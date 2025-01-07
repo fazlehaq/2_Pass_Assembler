@@ -3,7 +3,7 @@
     #include <string.h>
     #include"parser.tab.h"
     #include"../headers/utils.h"
-    int yyline = 1;
+    int yyline = 0;
 %}
 
 %option caseless
@@ -51,14 +51,11 @@ dword               {return DWORD;}
 
 {APLHNUM}[ \t]*:  { yylval.s = strndup(yytext,strip_extra_chars(yytext)); return LABEL_DECLARE;}
 {APLHNUM}          {yylval.s= strndup(yytext,strlen(yytext)); return LABEL;}
-
-\n                  {yyline++; return NEWLINE;}
+\n                  { return NEWLINE;}
 [ \t]               { /* ignore white spaces */ }
 
 %%
 
 int yywrap(){ 
     return 1;
-    // 0[xX][0-9a-fA-F]+   {yylval.i = binary_str_to_int(yytext); return HEX_VAL;}
-// 0[bB][0-1]+         {yylval.i = hex_str_to_int(yytext); return BIN_VAL;}
 }

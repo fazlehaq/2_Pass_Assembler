@@ -5,12 +5,11 @@
 #include "../headers/symbol-table.h"
 #include "../headers/utils.h"
 
-int handle_variable_symbol(int pass, SymbolTable *symbol_table, FILE *lst_file, char *symbol_name, int address, int section, int size, int status, int value)
+int handle_variable_symbol(int pass, SymbolTable *symbol_table, FILE *lst_file, FILE *data_file,char *symbol_name, int address, int section, int size, int status, int value)
 {
     if (pass == 1)
     {
-
-        int res = insert_symbol(symbol_table, symbol_name, address, section, size, status, value);
+        int res = insert_symbol(symbol_table, symbol_name, address, section, size, status);
 
         if (res == 0)
         {
@@ -26,6 +25,12 @@ int handle_variable_symbol(int pass, SymbolTable *symbol_table, FILE *lst_file, 
         {
             encoding = (char *)malloc((2 * size) + 1);
             to_little_endian(encoding, value, size);
+            fprintf(lst_file,"%s",encoding);
+            union type_conversion number;
+            number.i = value;
+            for(int i=0;i<size;i++){
+                fwrite(&number.byte[i],1,1,data_file);
+            }
         }
         else if (section == BSS_SECTION)
         {
@@ -79,7 +84,7 @@ void handle_label(int pass, SymbolTable *symbol_table, char *symbol_name, int ad
         }
         else if (!symbol && section == TEXT_SECTION)
         {
-            insert_symbol(symbol_table, symbol_name, address, section, 0, status, -1);
+            insert_symbol(symbol_table, symbol_name, address, section, 0, status);
         }
         else
         {
@@ -90,7 +95,7 @@ void handle_label(int pass, SymbolTable *symbol_table, char *symbol_name, int ad
 }
 
 // checks if inst is valid and returns the size of inst
-int handle_op_label(int pass, SymbolTable *symbol_table, FILE *lst_file, int curr_address, char *op_name, char *label_name)
+int handle_op_label(int pass, SymbolTable *symbol_table, FILE *lst_file,FILE *txt, int curr_address, char *op_name, char *label_name)
 {
     int inst_size;
 
@@ -124,13 +129,16 @@ int handle_op_label(int pass, SymbolTable *symbol_table, FILE *lst_file, int cur
         char displcement = (char)((symbol->address) - (curr_address + 2));
         snprintf(encoding, 2 + 1 + 8 + 1 + 1, "%02X%02X", (unsigned char)opcode, (unsigned char)displcement);
         fprintf(lst_file, "%s", encoding);
+        // fwrite(&opcode,1,1,txt);
+        // fwrite(&displcement,1,1,txt);
+        fprintf(txt,"%c%c",opcode,displcement);
         free(encoding);
     }
 
     return inst_size;
 }
 
-int handle_op_register(int pass, FILE *lst_file, char *op_name, char *reg)
+int handle_op_register(int pass, FILE *lst_file, FILE *txt, char *op_name, char *reg)
 {
     // Div Mul-> 2 bytes
     // INC DEC -> 1 bytes
@@ -154,11 +162,14 @@ int handle_op_register(int pass, FILE *lst_file, char *op_name, char *reg)
         {
             encoding = (char *)malloc(3);
             snprintf(encoding, 3, "%02X", 0x40 + get_register_number(reg));
+            fprintf(txt,"%c",0x40+get_register_number(reg));
         }
         else if (strcmp(op_name, "dec") == 0)
         {
             encoding = (char *)malloc(3);
             snprintf(encoding, 3, "%02X", 0x48 + get_register_number(reg));
+            // snprintf(encoding, 3, "%02X", 0x48 + get_register_number(reg));
+            fprintf(txt,"%c",0x48+get_register_number(reg));
         }
         else if (strcmp(op_name, "mul") == 0)
         {
@@ -168,6 +179,8 @@ int handle_op_register(int pass, FILE *lst_file, char *op_name, char *reg)
             char *rm_bits = get_register_encoding(reg);
             unsigned char mod_byte = make_mod_rm_byte(mod_bits, reg_bits, rm_bits);
             snprintf(encoding, 5, "%02X%02X", 0xF7, mod_byte);
+            fprintf(txt,"%c%c", 0x48 + get_register_number(reg),mod_byte);
+
         }
         else if (strcmp(op_name, "div") == 0)
         {
@@ -177,6 +190,7 @@ int handle_op_register(int pass, FILE *lst_file, char *op_name, char *reg)
             char *rm_bits = get_register_encoding(reg);
             unsigned char mod_byte = make_mod_rm_byte(mod_bits, reg_bits, rm_bits);
             snprintf(encoding, 5, "%02X%02X", 0xF7, mod_byte);
+            fprintf(txt,"%c%c", 0xF7 + get_register_number(reg),mod_byte);
         }
 
         else
@@ -191,7 +205,7 @@ int handle_op_register(int pass, FILE *lst_file, char *op_name, char *reg)
     return inst_size;
 }
 
-int handle_op_reg_reg(int pass, FILE *lst_file, char *op_name, char *reg1, char *reg2)
+int handle_op_reg_reg(int pass, FILE *lst_file, FILE *txt,char *op_name, char *reg1, char *reg2)
 {
     int inst_size;
 
@@ -230,13 +244,15 @@ int handle_op_reg_reg(int pass, FILE *lst_file, char *op_name, char *reg1, char 
         unsigned char mod_byte = make_mod_rm_byte(mod_bits, reg_bits, rm_bits);
         snprintf(encoding, 5, "%02X%02X", opcode, mod_byte);
         fprintf(lst_file, "%s", encoding);
+
+        fprintf(txt,"%c%c",opcode,mod_byte);
         free(encoding);
     }
 
     return inst_size;
 }
 
-int handle_reg_addr_to_reg(int pass, FILE *lst_file, char *op_name, char *reg1, char *reg2)
+int handle_reg_addr_to_reg(int pass, FILE *lst_file, FILE *txt,char *op_name, char *reg1, char *reg2)
 {
     int inst_size;
 
@@ -275,12 +291,14 @@ int handle_reg_addr_to_reg(int pass, FILE *lst_file, char *op_name, char *reg1, 
         unsigned char mod_byte = make_mod_rm_byte(mod_bits, reg_bits, rm_bits);
         snprintf(encoding, 5, "%02X%02X", opcode, mod_byte);
         fprintf(lst_file, "%s", encoding);
+        fprintf(txt,"%c%c",opcode,mod_byte);
+
         free(encoding);
     }
     return inst_size;
 }
 
-int handle_reg_to_immd_val(int pass, FILE *lst_file, char *op_name, char *reg1, int value)
+int handle_reg_to_immd_val(int pass, FILE *lst_file, FILE *txt,char *op_name, char *reg1, int value)
 {
 
     int inst_size;
@@ -341,6 +359,8 @@ int handle_reg_to_immd_val(int pass, FILE *lst_file, char *op_name, char *reg1, 
 
             snprintf(encoding, 3, "%02X", opcode);
             to_little_endian(encoding + 2, value, 4);
+            fwrite(&opcode,1,1,txt);
+            fwrite(&value,1,4,txt);
         }
         else
         {
@@ -366,6 +386,9 @@ int handle_reg_to_immd_val(int pass, FILE *lst_file, char *op_name, char *reg1, 
                 unsigned char mod_byte = make_mod_rm_byte(mod_bits, reg_bits, rm_bits);
                 snprintf(encoding, 5, "%02X%02X", opcode, mod_byte);
                 to_little_endian(encoding + 4, value, 1);
+                fwrite(&opcode,1,1,txt);
+                fwrite(&mod_byte,1,1,txt);
+                fwrite(&value,1,1,txt);
             }
             else if (byte_size == 2 || byte_size == 4)
             {
@@ -393,6 +416,10 @@ int handle_reg_to_immd_val(int pass, FILE *lst_file, char *op_name, char *reg1, 
                     unsigned char mod_byte = make_mod_rm_byte(mod_bits, reg_bits, rm_bits);
                     snprintf(encoding, 5, "%02X%02X", opcode, mod_byte);
                     to_little_endian(encoding + 4, value, 4);
+
+                    fwrite(&opcode,1,1,txt);
+                    fwrite(&mod_byte,1,1,txt);
+                    fwrite(&value,4,1,txt);
                 }
                 else
                 {
@@ -417,6 +444,9 @@ int handle_reg_to_immd_val(int pass, FILE *lst_file, char *op_name, char *reg1, 
 
                     snprintf(encoding, 2 + 1, "%02X", opcode);
                     to_little_endian(encoding + 2, value, 4);
+
+                    fwrite(&opcode,1,1,txt);
+                    fwrite(&value,4,1,txt);
                 }
             }
         }
@@ -427,7 +457,7 @@ int handle_reg_to_immd_val(int pass, FILE *lst_file, char *op_name, char *reg1, 
     return inst_size;
 }
 
-int handle_reg_to_label(int pass, SymbolTable *symbol_table, FILE *lst_file, char *op_name, char *reg1, char *label_name)
+int handle_reg_to_label(int pass, SymbolTable *symbol_table, FILE *lst_file, FILE *txt,char *op_name, char *reg1, char *label_name)
 {
     Symbol *symbol = search_symbol(symbol_table, label_name);
 
@@ -482,6 +512,9 @@ int handle_reg_to_label(int pass, SymbolTable *symbol_table, FILE *lst_file, cha
             snprintf(encoding, 2 + 1 + 1, "%02X[", opcode);
             to_little_endian(encoding + 3, symbol->address, 4);
             snprintf(encoding + 3 + 8, 2, "%s", "]");
+
+            fwrite(&opcode,1,1,txt);
+            fwrite(&(symbol->address),4,1,txt);
         }
         else
         {
@@ -509,6 +542,9 @@ int handle_reg_to_label(int pass, SymbolTable *symbol_table, FILE *lst_file, cha
                 snprintf(encoding, 6, "%02X%02X[", opcode, mod_byte);
                 to_little_endian(encoding + 5, symbol->address, 4);
                 snprintf(encoding + 5 + 8, 2, "]");
+                fwrite(&opcode,1,1,txt);
+                fwrite(&mod_byte,1,1,txt);
+                fwrite(&(symbol->address),4,1,txt);
             }
             else
             {
@@ -526,6 +562,10 @@ int handle_reg_to_label(int pass, SymbolTable *symbol_table, FILE *lst_file, cha
                 snprintf(encoding, 2 + 1 + 1, "%02X[", opcode);
                 to_little_endian(encoding + 3, symbol->address, 4);
                 snprintf(encoding + 3 + 8, 2, "]");
+
+                fwrite(&opcode,1,1,txt);
+                fwrite(&(symbol->address),4,1,txt);
+
             }
         }
 
@@ -535,7 +575,7 @@ int handle_reg_to_label(int pass, SymbolTable *symbol_table, FILE *lst_file, cha
     return inst_size;
 }
 
-int handle_reg_to_label_address(int pass, SymbolTable *symbol_table, FILE *lst_file, char *op_name, char *reg1, char *label_name)
+int handle_reg_to_label_address(int pass, SymbolTable *symbol_table, FILE *lst_file, FILE *txt,char *op_name, char *reg1, char *label_name)
 {
     Symbol *symbol = search_symbol(symbol_table, label_name);
 
@@ -570,10 +610,14 @@ int handle_reg_to_label_address(int pass, SymbolTable *symbol_table, FILE *lst_f
 
         if (strcmp("eax", reg1) == 0 && strcmp(op_name, "mov") == 0)
         {
+            char opcode = 0XA1;
             encoding = (char *)malloc(2 + 1 + 8 + 1 + 1);
             snprintf(encoding, 2 + 1 + 1, "%02X[", 0XA1);
             to_little_endian(encoding + 3, symbol->address, 4);
             snprintf(encoding + 2 + 1 + 8, 2, "]");
+
+            fwrite(&opcode,1,1,txt);
+            fwrite(&(symbol -> address),4,1,txt);
         }
         else
         {
@@ -598,6 +642,10 @@ int handle_reg_to_label_address(int pass, SymbolTable *symbol_table, FILE *lst_f
             snprintf(encoding, 4 + 1 + 1, "%02X%02X[", opcode, mod_byte);
             to_little_endian(encoding + 5, symbol->address, 4);
             snprintf(encoding + 5 + 8, 2, "]");
+
+            fwrite(&opcode,1,1,txt);
+            fwrite(&mod_byte,1,1,txt);
+            fwrite(&(symbol->address),4,1,txt);
         }
 
         fprintf(lst_file, "%s", encoding);
@@ -607,7 +655,7 @@ int handle_reg_to_label_address(int pass, SymbolTable *symbol_table, FILE *lst_f
     return inst_size;
 }
 
-int handle_reg_to_immd_address(int pass, FILE *lst_file, char *op_name, char *reg1, int value)
+int handle_reg_to_immd_address(int pass, FILE *lst_file, FILE *txt,char *op_name, char *reg1, int value)
 {
     if (!check_number_size((long)value, 4))
     {
@@ -637,9 +685,13 @@ int handle_reg_to_immd_address(int pass, FILE *lst_file, char *op_name, char *re
 
         if (strcmp("eax", reg1) == 0 && strcmp(op_name, "mov") == 0)
         {
+            char opcode = 0XA1;
             encoding = (char *)malloc(2 + 8 + 1);
             snprintf(encoding, 2 + 1, "%02X", 0XA1);
             to_little_endian(encoding + 2, value, 4);
+
+            fwrite(&opcode,1,1,txt);
+            fwrite(&value,4,1,txt);
         }
         else
         {
@@ -663,6 +715,10 @@ int handle_reg_to_immd_address(int pass, FILE *lst_file, char *op_name, char *re
 
             snprintf(encoding, 4 + 1, "%02X%02X", opcode, mod_byte);
             to_little_endian(encoding + 4, value, 4);
+
+            fwrite(&opcode,1,1,txt);
+            fwrite(&mod_byte,1,1,txt);
+            fwrite(&value,4,1,txt);
         }
 
         fprintf(lst_file, "%s", encoding);
@@ -672,7 +728,7 @@ int handle_reg_to_immd_address(int pass, FILE *lst_file, char *op_name, char *re
     return inst_size;
 }
 
-int handle_reg_to_reg_address(int pass, FILE *lst_file, char *op_name, char *reg1, char *reg2)
+int handle_reg_to_reg_address(int pass, FILE *lst_file, FILE *txt,char *op_name, char *reg1, char *reg2)
 {
     int inst_size ;
     if (
@@ -712,11 +768,14 @@ int handle_reg_to_reg_address(int pass, FILE *lst_file, char *op_name, char *reg
         snprintf(encoding, 5, "%02X%02X", opcode, mod_byte);
         fprintf(lst_file, "%s", encoding);
         free(encoding);
+
+        fwrite(&opcode,1,1,txt);
+        fwrite(&mod_byte,1,1,txt);
     }
     return inst_size ;
 }
 
-int handle_op_reg_addr(int pass, FILE *lst_file, char *op_name, char *reg1)
+int handle_op_reg_addr(int pass, FILE *lst_file, FILE *txt,char *op_name, char *reg1)
 {
     int inst_size;
         if (
@@ -772,11 +831,14 @@ int handle_op_reg_addr(int pass, FILE *lst_file, char *op_name, char *reg1)
 
         fprintf(lst_file, "%s", encoding);
         free(encoding);
+
+        fwrite(&opcode,1,1,txt);
+        fwrite(&mod_byte,1,1,txt);
     }
     return inst_size;
 }
 
-int handle_dword_reg_addr_to_immd(int pass, FILE *lst_file, char *op_name, char *reg1, int value)
+int handle_dword_reg_addr_to_immd(int pass, FILE *lst_file, FILE *txt,char *op_name, char *reg1, int value)
 {
     int inst_size;
         if (
@@ -831,6 +893,10 @@ int handle_dword_reg_addr_to_immd(int pass, FILE *lst_file, char *op_name, char 
 
         fprintf(lst_file, "%s", encoding);
         free(encoding);
+
+        fwrite(&opcode,1,1,txt);
+        fwrite(&mod_byte,1,1,txt);
+        fwrite(&value,4,1,txt);
     }
     return inst_size;
 }
