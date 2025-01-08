@@ -21,6 +21,35 @@
 - Opcodes are taken from intel manual
 - Scale Index Byte not supported yet
 
+## How to run ?
+
+- Install glib
+
+```bash
+    sudo apt update
+    sudo apt install libglib2.0-dev
+```
+
+- Run make all
+
+```bash
+    make all
+```
+
+- Run assembler
+
+```bash
+    ./obj/assembler.o <filepath>
+```
+
+- View the obj file
+
+```bash
+    ./obj/read_obj_file <obj_file_path>
+```
+
+---
+
 ## Update
 
 - Symbol Table generation.
