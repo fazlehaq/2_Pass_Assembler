@@ -1,11 +1,11 @@
-CFLAGS = $(shell pkg-config --cflags glib-2.0) -Wall -g
+CFLAGS = $(shell pkg-config --cflags glib-2.0) -Wall 
 LDFLAGS = $(shell pkg-config --libs glib-2.0) 
 
 hello: 
 	@echo "hello"
 
 obj/read_obj_file.o: src/read_obj_file.c
-	@gcc -c $(CFLAGS) src/read_obj_file.c -o obj/read_obj_file.o 
+	@gcc src/read_obj_file.c -o obj/read_obj_file
 
 obj/obj_file.o: src/obj_file.c
 	@gcc -c $(CFLAGS) src/obj_file.c -o obj/obj_file.o 
@@ -34,7 +34,7 @@ main: assembler.o
 all : main obj/read_obj_file.o
 
 assemble : 
-	@./obj/assembler.o ./asm/prg.asm
+	@./obj/assembler.o ./sample/prg.asm
 
 clean : 
 	@rm obj/* src/lex.yy.c src/*.tab.*
