@@ -1,0 +1,23 @@
+Magic Number : CAFEBABE
+
+Name  text  : Size 69  : Offset : 76
+Name  data  : Size 8  : Offset : 145
+Name  symbol table  : Size 140  : Offset : 153
+
+text:
+B8 05 00 00 00 89 C3 8B 0D 00 00 00 00 8B 15 00 
+00 00 00 83 C0 0A 01 D8 03 05 04 00 00 00 2D 00 
+00 00 00 29 18 2B 05 00 00 00 00 BB FE FF FF FF 
+49 E1 FA F3 31 C0 31 D3 75 06 40 4B 39 D8 74 00 
+B8 01 00 00 00 
+
+data:
+0A 00 00 00 14 00 00 00 
+
+Symbol Table:
+Name             Section  Status   Address 
+num1             1        1        0       
+num2             1        1        4       
+temp             2        2        0       
+bz               3        1        2B      
+le               3        1        40      
