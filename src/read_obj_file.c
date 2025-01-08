@@ -9,6 +9,7 @@ void print_section(char *section_name,unsigned int section_offset, unsigned int 
     while(cnt < section_size){
         fread(&byte,1,1,obj_file);
         cnt++;
+        printf("%02X ",byte);
         if((cnt % 16) == 0) printf("\n");
     }
     printf("\n");
